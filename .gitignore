@@ -1,4 +1,4 @@
 dist
 utils-go
 .git-credentials
-/dal/cmd/cmd
+dal/cmd/cmd

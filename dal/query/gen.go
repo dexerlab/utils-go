@@ -26,6 +26,8 @@ var (
 	TTag                 *tTag
 	TTokenInfo           *tTokenInfo
 	TTransfer            *tTransfer
+	TUserAccount         *tUserAccount
+	TUserAddress         *tUserAddress
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
@@ -39,6 +41,8 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	TTag = &Q.TTag
 	TTokenInfo = &Q.TTokenInfo
 	TTransfer = &Q.TTransfer
+	TUserAccount = &Q.TUserAccount
+	TUserAddress = &Q.TUserAddress
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
@@ -53,6 +57,8 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		TTag:                 newTTag(db, opts...),
 		TTokenInfo:           newTTokenInfo(db, opts...),
 		TTransfer:            newTTransfer(db, opts...),
+		TUserAccount:         newTUserAccount(db, opts...),
+		TUserAddress:         newTUserAddress(db, opts...),
 	}
 }
 
@@ -68,6 +74,8 @@ type Query struct {
 	TTag                 tTag
 	TTokenInfo           tTokenInfo
 	TTransfer            tTransfer
+	TUserAccount         tUserAccount
+	TUserAddress         tUserAddress
 }
 
 func (q *Query) Available() bool { return q.db != nil }
@@ -84,6 +92,8 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		TTag:                 q.TTag.clone(db),
 		TTokenInfo:           q.TTokenInfo.clone(db),
 		TTransfer:            q.TTransfer.clone(db),
+		TUserAccount:         q.TUserAccount.clone(db),
+		TUserAddress:         q.TUserAddress.clone(db),
 	}
 }
 
@@ -107,6 +117,8 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		TTag:                 q.TTag.replaceDB(db),
 		TTokenInfo:           q.TTokenInfo.replaceDB(db),
 		TTransfer:            q.TTransfer.replaceDB(db),
+		TUserAccount:         q.TUserAccount.replaceDB(db),
+		TUserAddress:         q.TUserAddress.replaceDB(db),
 	}
 }
 
@@ -120,6 +132,8 @@ type queryCtx struct {
 	TTag                 ITTagDo
 	TTokenInfo           ITTokenInfoDo
 	TTransfer            ITTransferDo
+	TUserAccount         ITUserAccountDo
+	TUserAddress         ITUserAddressDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
@@ -133,6 +147,8 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		TTag:                 q.TTag.WithContext(ctx),
 		TTokenInfo:           q.TTokenInfo.WithContext(ctx),
 		TTransfer:            q.TTransfer.WithContext(ctx),
+		TUserAccount:         q.TUserAccount.WithContext(ctx),
+		TUserAddress:         q.TUserAddress.WithContext(ctx),
 	}
 }
 
