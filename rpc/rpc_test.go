@@ -7,7 +7,7 @@ import (
 	"github.com/block-vision/sui-go-sdk/sui"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/gagliardetto/solana-go/rpc"
-	"github.com/realcaishen/utils-go/loader"
+	"github.com/dexerlab/utils-go/loader"
 	"github.com/shopspring/decimal"
 )
 

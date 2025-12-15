@@ -16,7 +16,7 @@ import (
 
 	"gorm.io/plugin/dbresolver"
 
-	"github.com/realcaishen/utils-go/dal/model"
+	"github.com/dexerlab/utils-go/dal/model"
 )
 
 func newTUserAddress(db *gorm.DB, opts ...gen.DOOption) tUserAddress {

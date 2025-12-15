@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/realcaishen/utils-go/network"
+	"github.com/dexerlab/utils-go/network"
 )
 
 // alerter := alert.NewLarkAlerter("https://open.larksuite.com/open-apis/bot/v2/hook/xxxx")

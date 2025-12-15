@@ -10,8 +10,8 @@ import (
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/block-vision/sui-go-sdk/sui"
 	_ "github.com/gagliardetto/solana-go"
-	"github.com/realcaishen/utils-go/loader"
-	"github.com/realcaishen/utils-go/util"
+	"github.com/dexerlab/utils-go/loader"
+	"github.com/dexerlab/utils-go/util"
 	"github.com/shopspring/decimal"
 )
 

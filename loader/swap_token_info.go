@@ -3,13 +3,13 @@ package loader
 import (
 	"database/sql"
 	"fmt"
-	"github.com/realcaishen/utils-go/asynccache"
-	"github.com/realcaishen/utils-go/log"
+	"github.com/dexerlab/utils-go/asynccache"
+	"github.com/dexerlab/utils-go/log"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/realcaishen/utils-go/alert"
+	"github.com/dexerlab/utils-go/alert"
 )
 
 type SwapTokenInfoManager struct {

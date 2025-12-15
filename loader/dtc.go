@@ -7,8 +7,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/realcaishen/utils-go/alert"
-	"github.com/realcaishen/utils-go/util"
+	"github.com/dexerlab/utils-go/alert"
+	"github.com/dexerlab/utils-go/util"
 )
 
 type Dtc struct {

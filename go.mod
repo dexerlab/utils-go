@@ -1,4 +1,4 @@
-module github.com/realcaishen/utils-go
+module github.com/dexerlab/utils-go
 
 go 1.23.1
 

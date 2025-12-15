@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/realcaishen/utils-go/dal/model"
+	"github.com/dexerlab/utils-go/dal/model"
 	"github.com/shopspring/decimal"
 	"gorm.io/driver/mysql"
 	"gorm.io/gen"

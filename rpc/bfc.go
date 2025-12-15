@@ -7,9 +7,9 @@ import (
 	"strings"
 
 	_ "github.com/gagliardetto/solana-go"
-	"github.com/realcaishen/utils-go/loader"
-	"github.com/realcaishen/utils-go/network"
-	"github.com/realcaishen/utils-go/util"
+	"github.com/dexerlab/utils-go/loader"
+	"github.com/dexerlab/utils-go/network"
+	"github.com/dexerlab/utils-go/util"
 )
 
 type BenfenRpc struct {

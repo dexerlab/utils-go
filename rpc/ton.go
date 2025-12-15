@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/realcaishen/utils-go/loader"
-	"github.com/realcaishen/utils-go/util"
+	"github.com/dexerlab/utils-go/loader"
+	"github.com/dexerlab/utils-go/util"
 	"github.com/xssnick/tonutils-go/address"
 	"github.com/xssnick/tonutils-go/liteclient"
 	"github.com/xssnick/tonutils-go/ton"

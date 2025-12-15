@@ -10,7 +10,7 @@ import (
 
 	"github.com/NethermindEth/starknet.go/curve"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/realcaishen/utils-go/owlconsts"
+	"github.com/dexerlab/utils-go/owlconsts"
 )
 
 func IsNativeAddress(address string) bool {

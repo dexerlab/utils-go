@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/realcaishen/utils-go/system"
+	"github.com/dexerlab/utils-go/system"
 	"github.com/pelletier/go-toml"
 	"github.com/spf13/viper"
 )
@@ -15,7 +15,7 @@ import (
 // import (
 // 	"fmt"
 
-// 	"github.com/realcaishen/utils-go/config"
+// 	"github.com/dexerlab/utils-go/config"
 // )
 
 // type Tel struct {

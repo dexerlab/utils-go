@@ -5,8 +5,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/realcaishen/utils-go/alert"
-	"github.com/realcaishen/utils-go/dal/model"
+	"github.com/dexerlab/utils-go/alert"
+	"github.com/dexerlab/utils-go/dal/model"
 )
 
 type TokenInfo = model.TTokenInfo
