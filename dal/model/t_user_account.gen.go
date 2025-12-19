@@ -12,13 +12,16 @@ const TableNameTUserAccount = "t_user_account"
 
 // TUserAccount mapped from table <t_user_account>
 type TUserAccount struct {
-	ID       int64     `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true" json:"id"`
-	Email    string    `gorm:"column:email;type:varchar(255);not null" json:"email"`
-	Status   int32     `gorm:"column:status;type:int" json:"status"`
-	Channel  string    `gorm:"column:channel;type:varchar(255)" json:"channel"`
-	Sub      string    `gorm:"column:sub;type:varchar(255)" json:"sub"`
-	CreateAt time.Time `gorm:"column:create_at;type:datetime;default:CURRENT_TIMESTAMP" json:"create_at"`
-	UpdateAt time.Time `gorm:"column:update_at;type:datetime;default:CURRENT_TIMESTAMP" json:"update_at"`
+	ID           int64     `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true" json:"id"`
+	Status       int32     `gorm:"column:status;type:int;not null" json:"status"`
+	MainUID      string    `gorm:"column:main_uid;type:varchar(255);not null" json:"main_uid"`
+	MainEmail    string    `gorm:"column:main_email;type:varchar(255);not null" json:"main_email"`
+	MainProvider string    `gorm:"column:main_provider;type:varchar(255);not null" json:"main_provider"`
+	AuxUID       string    `gorm:"column:aux_uid;type:varchar(255);not null" json:"aux_uid"`
+	AuxProvider  string    `gorm:"column:aux_provider;type:varchar(255);not null" json:"aux_provider"`
+	AuxEmail     string    `gorm:"column:aux_email;type:varchar(255);not null" json:"aux_email"`
+	CreateAt     time.Time `gorm:"column:create_at;type:datetime;default:CURRENT_TIMESTAMP" json:"create_at"`
+	UpdateAt     time.Time `gorm:"column:update_at;type:datetime;default:CURRENT_TIMESTAMP" json:"update_at"`
 }
 
 // TableName TUserAccount's table name

@@ -28,10 +28,13 @@ func newTUserAccount(db *gorm.DB, opts ...gen.DOOption) tUserAccount {
 	tableName := _tUserAccount.tUserAccountDo.TableName()
 	_tUserAccount.ALL = field.NewAsterisk(tableName)
 	_tUserAccount.ID = field.NewInt64(tableName, "id")
-	_tUserAccount.Email = field.NewString(tableName, "email")
 	_tUserAccount.Status = field.NewInt32(tableName, "status")
-	_tUserAccount.Channel = field.NewString(tableName, "channel")
-	_tUserAccount.Sub = field.NewString(tableName, "sub")
+	_tUserAccount.MainUID = field.NewString(tableName, "main_uid")
+	_tUserAccount.MainEmail = field.NewString(tableName, "main_email")
+	_tUserAccount.MainProvider = field.NewString(tableName, "main_provider")
+	_tUserAccount.AuxUID = field.NewString(tableName, "aux_uid")
+	_tUserAccount.AuxProvider = field.NewString(tableName, "aux_provider")
+	_tUserAccount.AuxEmail = field.NewString(tableName, "aux_email")
 	_tUserAccount.CreateAt = field.NewTime(tableName, "create_at")
 	_tUserAccount.UpdateAt = field.NewTime(tableName, "update_at")
 
@@ -43,14 +46,17 @@ func newTUserAccount(db *gorm.DB, opts ...gen.DOOption) tUserAccount {
 type tUserAccount struct {
 	tUserAccountDo tUserAccountDo
 
-	ALL      field.Asterisk
-	ID       field.Int64
-	Email    field.String
-	Status   field.Int32
-	Channel  field.String
-	Sub      field.String
-	CreateAt field.Time
-	UpdateAt field.Time
+	ALL          field.Asterisk
+	ID           field.Int64
+	Status       field.Int32
+	MainUID      field.String
+	MainEmail    field.String
+	MainProvider field.String
+	AuxUID       field.String
+	AuxProvider  field.String
+	AuxEmail     field.String
+	CreateAt     field.Time
+	UpdateAt     field.Time
 
 	fieldMap map[string]field.Expr
 }
@@ -68,10 +74,13 @@ func (t tUserAccount) As(alias string) *tUserAccount {
 func (t *tUserAccount) updateTableName(table string) *tUserAccount {
 	t.ALL = field.NewAsterisk(table)
 	t.ID = field.NewInt64(table, "id")
-	t.Email = field.NewString(table, "email")
 	t.Status = field.NewInt32(table, "status")
-	t.Channel = field.NewString(table, "channel")
-	t.Sub = field.NewString(table, "sub")
+	t.MainUID = field.NewString(table, "main_uid")
+	t.MainEmail = field.NewString(table, "main_email")
+	t.MainProvider = field.NewString(table, "main_provider")
+	t.AuxUID = field.NewString(table, "aux_uid")
+	t.AuxProvider = field.NewString(table, "aux_provider")
+	t.AuxEmail = field.NewString(table, "aux_email")
 	t.CreateAt = field.NewTime(table, "create_at")
 	t.UpdateAt = field.NewTime(table, "update_at")
 
@@ -102,12 +111,15 @@ func (t *tUserAccount) GetFieldByName(fieldName string) (field.OrderExpr, bool) 
 }
 
 func (t *tUserAccount) fillFieldMap() {
-	t.fieldMap = make(map[string]field.Expr, 7)
+	t.fieldMap = make(map[string]field.Expr, 10)
 	t.fieldMap["id"] = t.ID
-	t.fieldMap["email"] = t.Email
 	t.fieldMap["status"] = t.Status
-	t.fieldMap["channel"] = t.Channel
-	t.fieldMap["sub"] = t.Sub
+	t.fieldMap["main_uid"] = t.MainUID
+	t.fieldMap["main_email"] = t.MainEmail
+	t.fieldMap["main_provider"] = t.MainProvider
+	t.fieldMap["aux_uid"] = t.AuxUID
+	t.fieldMap["aux_provider"] = t.AuxProvider
+	t.fieldMap["aux_email"] = t.AuxEmail
 	t.fieldMap["create_at"] = t.CreateAt
 	t.fieldMap["update_at"] = t.UpdateAt
 }

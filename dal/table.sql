@@ -162,15 +162,20 @@ CREATE TABLE `t_transfer` (
 
 CREATE TABLE t_user_account (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,           -- 用户唯一标识符，主键，自增
-    email VARCHAR(255) NOT NULL,                    -- 用户邮箱
-    status INT DEFAULT 0,                           -- 账号状态，默认0
-    channel VARCHAR(255),                           -- 渠道
-    sub VARCHAR(255) UNIQUE,                        -- oauth sub，唯一
+    status INT NOT NULL DEFAULT 0,                           -- 账号状态，默认0
+    main_uid VARCHAR(255) NOT NULL,                        -- oauth uid，唯一
+    main_email VARCHAR(255) NOT NULL DEFAULT '',                    -- 用户邮箱
+    main_provider VARCHAR(255) NOT NULL DEFAULT '',                    -- 用户邮箱
+    aux_uid VARCHAR(255) NOT NULL,                           -- 辅助uid
+    aux_provider VARCHAR(255) NOT NULL DEFAULT '',                           -- 渠道
+    aux_email VARCHAR(255) NOT NULL DEFAULT '',                    -- 用户邮箱
     create_at DATETIME DEFAULT CURRENT_TIMESTAMP,   -- 账号创建时间，默认为当前时间
     update_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,  -- 账号最后更新时间，自动更新时间
     -- Define unique constraints
-    UNIQUE KEY idx_sub (sub),                    -- 唯一索引，针对sub字段
-    UNIQUE KEY idx_email_channel (email, channel) -- 唯一索引，针对email和channel组合
+    UNIQUE KEY idx_main_uid (main_uid),                    
+    UNIQUE KEY idx_aux_uid (aux_uid),                    
+    KEY idx_main_email (main_email),
+    KEY idx_aux_email (aux_email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE t_user_address (
