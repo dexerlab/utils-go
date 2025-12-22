@@ -12,7 +12,7 @@ const TableNameTTransfer = "t_transfer"
 
 // TTransfer mapped from table <t_transfer>
 type TTransfer struct {
-	ID              int64     `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true" json:"id"`
+	ID              int64     `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true" json:"id,string"`
 	Chainid         int32     `gorm:"column:chainid;type:int;not null" json:"chainid"`
 	FromAddress     string    `gorm:"column:from_address;type:varchar(128);not null" json:"from_address"`
 	ToAddress       string    `gorm:"column:to_address;type:varchar(128);not null" json:"to_address"`
@@ -23,7 +23,7 @@ type TTransfer struct {
 	InsertTimestamp time.Time `gorm:"column:insert_timestamp;type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"insert_timestamp"`
 	Hash            string    `gorm:"column:hash;type:varchar(128);not null" json:"hash"`
 	SourceTable     string    `gorm:"column:source_table;type:varchar(64);not null" json:"source_table"`
-	SourceItemID    int64     `gorm:"column:source_item_id;type:bigint;not null" json:"source_item_id"`
+	SourceItemID    int64     `gorm:"column:source_item_id;type:bigint;not null" json:"source_item_id,string"`
 	TokenAddress    string    `gorm:"column:token_address;type:varchar(128);not null" json:"token_address"`
 }
 

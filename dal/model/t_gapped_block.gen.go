@@ -14,7 +14,7 @@ const TableNameTGappedBlock = "t_gapped_block"
 type TGappedBlock struct {
 	Chainid         int32     `gorm:"column:chainid;type:int;primaryKey" json:"chainid"`
 	Appid           int32     `gorm:"column:appid;type:int;primaryKey" json:"appid"`
-	BlockNumber     int64     `gorm:"column:block_number;type:bigint;primaryKey" json:"block_number"`
+	BlockNumber     int64     `gorm:"column:block_number;type:bigint;primaryKey" json:"block_number,string"`
 	UpdateTimestamp time.Time `gorm:"column:update_timestamp;type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"update_timestamp"`
 	InsertTimestamp time.Time `gorm:"column:insert_timestamp;type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"insert_timestamp"`
 	IsProcessed     int32     `gorm:"column:is_processed;type:int;not null" json:"is_processed"`

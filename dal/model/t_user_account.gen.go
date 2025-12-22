@@ -12,7 +12,7 @@ const TableNameTUserAccount = "t_user_account"
 
 // TUserAccount mapped from table <t_user_account>
 type TUserAccount struct {
-	ID           int64     `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true" json:"id"`
+	ID           int64     `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true" json:"id,string"`
 	Status       int32     `gorm:"column:status;type:int;not null" json:"status"`
 	MainUID      string    `gorm:"column:main_uid;type:varchar(255);not null" json:"main_uid"`
 	MainEmail    string    `gorm:"column:main_email;type:varchar(255);not null" json:"main_email"`

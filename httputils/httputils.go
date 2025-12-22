@@ -12,6 +12,28 @@ import (
 	"time"
 )
 
+type ResponseWrapper struct {
+	Code int         `json:"code"`
+	Msg  string      `json:"msg"`
+	Data interface{} `json:"data"`
+}
+
+func RspOk(data interface{}) ResponseWrapper {
+	return ResponseWrapper{
+		Code: 0,
+		Msg:  "",
+		Data: data,
+	}
+}
+
+func RspErr(data interface{}, code int, msg string) ResponseWrapper {
+	return ResponseWrapper{
+		Code: code,
+		Msg:  msg,
+		Data: data,
+	}
+}
+
 // Client wraps an HTTP client with additional functionality.
 type Client struct {
 	httpClient *http.Client

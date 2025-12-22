@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/dexerlab/utils-go/dal/model"
@@ -39,7 +40,19 @@ func main() {
 	g.UseDB(db)
 
 	// Generate code for a specific table (e.g., "token_info" table)
-	g.ApplyBasic(g.GenerateAllTable()...)
+	g.ApplyBasic(g.GenerateAllTable(
+		gen.FieldModify(func(f gen.Field) gen.Field {
+			t := f.Type
+			if t == "int64" || t == "uint64" || t == "*int64" || t == "*uint64" {
+				currentTag := f.Tag["json"]
+				if currentTag != "" && !strings.Contains(currentTag, ",string") {
+					// 设置回带有 ,string 的标签
+					f.Tag.Set("json", currentTag+",string")
+				}
+			}
+			return f
+		}),
+	)...)
 
 	// Optionally generate other helper methods like "crud" methods
 	// g.GenerateCrud("token_info")

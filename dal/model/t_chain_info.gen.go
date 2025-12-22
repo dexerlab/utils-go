@@ -12,7 +12,7 @@ const TableNameTChainInfo = "t_chain_info"
 
 // TChainInfo mapped from table <t_chain_info>
 type TChainInfo struct {
-	ID                      int64     `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true" json:"id"`
+	ID                      int64     `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true" json:"id,string"`
 	Chainid                 string    `gorm:"column:chainid;type:varchar(128);not null" json:"chainid"`
 	RealChainid             string    `gorm:"column:real_chainid;type:varchar(128);not null" json:"real_chainid"`
 	Name                    string    `gorm:"column:name;type:varchar(64);not null" json:"name"`

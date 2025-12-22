@@ -12,7 +12,7 @@ const TableNameTTag = "t_tag"
 
 // TTag mapped from table <t_tag>
 type TTag struct {
-	ID              int64     `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true" json:"id"`
+	ID              int64     `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true" json:"id,string"`
 	UpdateTimestamp time.Time `gorm:"column:update_timestamp;type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"update_timestamp"`
 	InsertTimestamp time.Time `gorm:"column:insert_timestamp;type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"insert_timestamp"`
 	TagName         string    `gorm:"column:tag_name;type:varchar(128);not null" json:"tag_name"`

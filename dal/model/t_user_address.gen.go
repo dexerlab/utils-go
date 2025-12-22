@@ -12,8 +12,8 @@ const TableNameTUserAddress = "t_user_address"
 
 // TUserAddress mapped from table <t_user_address>
 type TUserAddress struct {
-	ID       int64     `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true" json:"id"`
-	UID      int64     `gorm:"column:uid;type:bigint" json:"uid"`
+	ID       int64     `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true" json:"id,string"`
+	UID      int64     `gorm:"column:uid;type:bigint" json:"uid,string"`
 	Sn       int32     `gorm:"column:sn;type:int" json:"sn"`
 	Network  int32     `gorm:"column:network;type:int" json:"network"`
 	Address  string    `gorm:"column:address;type:varchar(255)" json:"address"`

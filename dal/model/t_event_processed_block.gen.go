@@ -16,9 +16,9 @@ type TEventProcessedBlock struct {
 	Appid                int32     `gorm:"column:appid;type:int;primaryKey" json:"appid"`
 	UpdateTimestamp      time.Time `gorm:"column:update_timestamp;type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"update_timestamp"`
 	InsertTimestamp      time.Time `gorm:"column:insert_timestamp;type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"insert_timestamp"`
-	BlockNumber          int64     `gorm:"column:block_number;type:bigint;not null" json:"block_number"`
-	LatestBlockNumber    int64     `gorm:"column:latest_block_number;type:bigint" json:"latest_block_number"`
-	BacktrackBlockNumber int64     `gorm:"column:backtrack_block_number;type:bigint;not null" json:"backtrack_block_number"`
+	BlockNumber          int64     `gorm:"column:block_number;type:bigint;not null" json:"block_number,string"`
+	LatestBlockNumber    int64     `gorm:"column:latest_block_number;type:bigint" json:"latest_block_number,string"`
+	BacktrackBlockNumber int64     `gorm:"column:backtrack_block_number;type:bigint;not null" json:"backtrack_block_number,string"`
 }
 
 // TableName TEventProcessedBlock's table name
