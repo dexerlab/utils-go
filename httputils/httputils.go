@@ -18,6 +18,14 @@ type ResponseWrapper struct {
 	Data interface{} `json:"data"`
 }
 
+func Rsp(data interface{}, code int, msg string) ResponseWrapper {
+	return ResponseWrapper{
+		Code: code,
+		Msg:  msg,
+		Data: data,
+	}
+}
+
 func RspOk(data interface{}) ResponseWrapper {
 	return ResponseWrapper{
 		Code: 0,
@@ -26,11 +34,11 @@ func RspOk(data interface{}) ResponseWrapper {
 	}
 }
 
-func RspErr(data interface{}, code int, msg string) ResponseWrapper {
+func RspErr(code int, msg string) ResponseWrapper {
 	return ResponseWrapper{
 		Code: code,
 		Msg:  msg,
-		Data: data,
+		Data: nil,
 	}
 }
 
