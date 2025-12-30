@@ -21,11 +21,38 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to connect to the database: %v", err)
 	}
+	Dogen(db, "../query", "../model")
 
+	token := model.TTokenInfo{
+		ID:              1,
+		InsertTimestamp: time.Now(),
+		UpdateTimestamp: time.Now(),
+		TokenName:       "Bitcoin",
+		ChainName:       "Bitcoin",
+		TokenAddress:    "abc123",
+		Decimals:        8,
+		FullName:        "Bitcoin",
+		TotalSupply:     decimal.NewFromFloat(21000000.0),
+
+		Icon: "bitcoin-icon",
+	}
+
+	// Serialize the object to JSON
+	data, err := json.Marshal(token)
+	if err != nil {
+		fmt.Println("Error marshaling object:", err)
+		return
+	}
+
+	// Output the JSON
+	fmt.Println(string(data))
+}
+
+func Dogen(db *gorm.DB, outPath string, modelPath string) {
 	// Set up the generator
 	g := gen.NewGenerator(gen.Config{
-		OutPath:      "../query",                                    // Path where the generated files will be stored
-		ModelPkgPath: "../model",                                    // Path where the model structs will be saved
+		OutPath:      outPath,                                       // Path where the generated files will be stored
+		ModelPkgPath: modelPath,                                     // Path where the model structs will be saved
 		Mode:         gen.WithDefaultQuery | gen.WithQueryInterface, // Generate QueryInterface (optional)
 		//FieldWithIndexTag: true,
 		FieldWithTypeTag: true,
@@ -61,30 +88,6 @@ func main() {
 	g.Execute()
 
 	fmt.Println("Code generation complete!")
-
-	token := model.TTokenInfo{
-		ID:              1,
-		InsertTimestamp: time.Now(),
-		UpdateTimestamp: time.Now(),
-		TokenName:       "Bitcoin",
-		ChainName:       "Bitcoin",
-		TokenAddress:    "abc123",
-		Decimals:        8,
-		FullName:        "Bitcoin",
-		TotalSupply:     decimal.NewFromFloat(21000000.0),
-
-		Icon: "bitcoin-icon",
-	}
-
-	// Serialize the object to JSON
-	data, err := json.Marshal(token)
-	if err != nil {
-		fmt.Println("Error marshaling object:", err)
-		return
-	}
-
-	// Output the JSON
-	fmt.Println(string(data))
 }
 
 // 用法:
