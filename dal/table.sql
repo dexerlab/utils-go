@@ -1,4 +1,170 @@
- CREATE TABLE `t_chain_info` (
+-- questdb
+CREATE TABLE trades (
+  ts TIMESTAMP,
+  -- Time of the trade
+  pool_id BIGINT,
+  -- 'long' does not exist in Postgres, use BIGINT
+  is_buy BOOLEAN,
+  -- Buy (true), Sell (false)
+  price DOUBLE PRECISION,
+  -- 'double' is DOUBLE PRECISION in Postgres
+  amount DOUBLE PRECISION -- Recommended for tokens (as we discussed)
+) timestamp(ts) PARTITION BY HOUR TTL 10 DAYS DEDUP UPSERT KEYS(ts, pool_id) WAL;
+
+-- 5 Minute
+CREATE MATERIALIZED VIEW kline_5m AS (
+  SELECT
+    ts,
+    pool_id,
+    first(price) open,
+    max(price) high,
+    min(price) low,
+    last(price) close,
+    sum(amount) volume
+  FROM
+    trades SAMPLE BY 5m ALIGN TO CALENDAR
+) timestamp(ts) PARTITION BY DAY WAL;
+
+-- 15 Minute
+CREATE MATERIALIZED VIEW kline_15m AS (
+  SELECT
+    ts,
+    pool_id,
+    first(price) open,
+    max(price) high,
+    min(price) low,
+    last(price) close,
+    sum(amount) volume
+  FROM
+    trades SAMPLE BY 15m ALIGN TO CALENDAR
+) timestamp(ts) PARTITION BY DAY WAL;
+
+-- 30 Minute
+CREATE MATERIALIZED VIEW kline_30m AS (
+  SELECT
+    ts,
+    pool_id,
+    first(price) open,
+    max(price) high,
+    min(price) low,
+    last(price) close,
+    sum(amount) volume
+  FROM
+    trades SAMPLE BY 30m ALIGN TO CALENDAR
+) timestamp(ts) PARTITION BY DAY WAL;
+
+-- 1 Hour
+CREATE MATERIALIZED VIEW kline_1h AS (
+  SELECT
+    ts,
+    pool_id,
+    first(price) open,
+    max(price) high,
+    min(price) low,
+    last(price) close,
+    sum(amount) volume
+  FROM
+    trades SAMPLE BY 1h ALIGN TO CALENDAR
+) timestamp(ts) PARTITION BY DAY WAL;
+
+-- 4 Hour
+CREATE MATERIALIZED VIEW kline_4h AS (
+  SELECT
+    ts,
+    pool_id,
+    first(price) open,
+    max(price) high,
+    min(price) low,
+    last(price) close,
+    sum(amount) volume
+  FROM
+    trades SAMPLE BY 4h ALIGN TO CALENDAR
+) timestamp(ts) PARTITION BY MONTH WAL;
+
+-- 12 Hour
+CREATE MATERIALIZED VIEW kline_12h AS (
+  SELECT
+    ts,
+    pool_id,
+    first(price) open,
+    max(price) high,
+    min(price) low,
+    last(price) close,
+    sum(amount) volume
+  FROM
+    trades SAMPLE BY 12h ALIGN TO CALENDAR
+) timestamp(ts) PARTITION BY MONTH WAL;
+
+-- 1 Day
+CREATE MATERIALIZED VIEW kline_1d AS (
+  SELECT
+    ts,
+    pool_id,
+    first(price) open,
+    max(price) high,
+    min(price) low,
+    last(price) close,
+    sum(amount) volume
+  FROM
+    trades SAMPLE BY 1d ALIGN TO CALENDAR
+) timestamp(ts) PARTITION BY YEAR WAL;
+
+-- 1 Week
+CREATE MATERIALIZED VIEW kline_1w AS (
+  SELECT
+    ts,
+    pool_id,
+    first(price) open,
+    max(price) high,
+    min(price) low,
+    last(price) close,
+    sum(amount) volume
+  FROM
+    trades SAMPLE BY 1w ALIGN TO CALENDAR
+) timestamp(ts) PARTITION BY YEAR WAL;
+
+-- 1 Month
+CREATE MATERIALIZED VIEW kline_1mo AS (
+  SELECT
+    ts,
+    pool_id,
+    first(price) open,
+    max(price) high,
+    min(price) low,
+    last(price) close,
+    sum(amount) volume
+  FROM
+    trades SAMPLE BY 1M ALIGN TO CALENDAR
+) timestamp(ts) PARTITION BY YEAR WAL;
+
+-- 1 Year
+CREATE MATERIALIZED VIEW kline_1y AS (
+  SELECT
+    ts,
+    pool_id,
+    first(price) open,
+    max(price) high,
+    min(price) low,
+    last(price) close,
+    sum(amount) volume
+  FROM
+    trades SAMPLE BY 1y ALIGN TO CALENDAR
+) timestamp(ts) PARTITION BY YEAR WAL;
+
+-- postgresql for questdb
+CREATE TABLE trades (
+  ts TIMESTAMP,
+  -- Time of the trade
+  pool_id BIGINT,
+  -- 'long' does not exist in Postgres, use BIGINT
+  is_buy BOOLEAN,
+  -- Buy (true), Sell (false)
+  price DOUBLE PRECISION,
+  -- 'double' is DOUBLE PRECISION in Postgres
+  amount DOUBLE PRECISION -- Recommended for tokens (as we discussed)
+);
+
+CREATE TABLE `t_chain_info` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `chainid` varchar(128) NOT NULL,
   `real_chainid` varchar(128) NOT NULL,
@@ -35,7 +201,7 @@
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `network_code` (`network_code`)
-) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB AUTO_INCREMENT = 52 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE `t_node_info` (
   `id` bigint NOT NULL AUTO_INCREMENT,
@@ -46,15 +212,14 @@ CREATE TABLE `t_node_info` (
   `type` int NOT NULL,
   `usability` int DEFAULT '100',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `chain_id_rpc_url` (`chain_id`,`rpc_url`)
-) ENGINE=InnoDB AUTO_INCREMENT=265 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  UNIQUE KEY `chain_id_rpc_url` (`chain_id`, `rpc_url`)
+) ENGINE = InnoDB AUTO_INCREMENT = 265 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE `t_kv` (
   `key` varchar(255) NOT NULL,
   `value` text,
   PRIMARY KEY (`key`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE `t_tag` (
   `id` bigint NOT NULL AUTO_INCREMENT,
@@ -63,7 +228,7 @@ CREATE TABLE `t_tag` (
   `tag_name` varchar(128) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_tag_name` (`tag_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB AUTO_INCREMENT = 52 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE `t_object_tag` (
   `object_table` varchar(64) NOT NULL,
@@ -71,10 +236,9 @@ CREATE TABLE `t_object_tag` (
   `tag_id` bigint NOT NULL,
   `update_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `insert_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`object_table`,`tag_id`,`object_id`),
-  KEY `idx_object` (`object_table`,`object_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
+  PRIMARY KEY (`object_table`, `tag_id`, `object_id`),
+  KEY `idx_object` (`object_table`, `object_id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE `t_token_info` (
   `id` bigint NOT NULL AUTO_INCREMENT,
@@ -85,7 +249,7 @@ CREATE TABLE `t_token_info` (
   `token_address` varchar(128) NOT NULL,
   `decimals` int NOT NULL,
   `full_name` varchar(128) NOT NULL DEFAULT '',
-  `total_supply` decimal(64,0) NOT NULL DEFAULT '0',
+  `total_supply` decimal(64, 0) NOT NULL DEFAULT '0',
   `discover_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `icon` varchar(1024) NOT NULL DEFAULT '',
   `twitter` varchar(1024) NOT NULL DEFAULT '',
@@ -115,10 +279,10 @@ CREATE TABLE `t_token_info` (
   `txsell5m` int NOT NULL DEFAULT '0',
   `flags` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_chain_name_token_address` (`chain_name`,`token_address`),
+  UNIQUE KEY `idx_chain_name_token_address` (`chain_name`, `token_address`),
   KEY `idx_token_name` (`token_name`),
   KEY `idx_insert_timestamp` (`insert_timestamp`)
-) ENGINE=InnoDB AUTO_INCREMENT=5820029 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB AUTO_INCREMENT = 5820029 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE `t_event_processed_block` (
   `chainid` int NOT NULL,
@@ -128,8 +292,8 @@ CREATE TABLE `t_event_processed_block` (
   `block_number` bigint NOT NULL,
   `latest_block_number` bigint DEFAULT NULL,
   `backtrack_block_number` bigint NOT NULL,
-  PRIMARY KEY (`chainid`,`appid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  PRIMARY KEY (`chainid`, `appid`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE `t_gapped_block` (
   `chainid` int NOT NULL,
@@ -138,8 +302,8 @@ CREATE TABLE `t_gapped_block` (
   `update_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `insert_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `is_processed` int NOT NULL,
-  PRIMARY KEY (`chainid`,`appid`,`block_number`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  PRIMARY KEY (`chainid`, `appid`, `block_number`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE `t_transfer` (
   `id` bigint NOT NULL AUTO_INCREMENT,
@@ -156,39 +320,57 @@ CREATE TABLE `t_transfer` (
   `source_item_id` bigint NOT NULL,
   `token_address` varchar(128) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_source_table_item_id` (`source_table`,`source_item_id`),
-  KEY `idx_process_invalid_inser` (`is_processed`,`is_invalid`,`insert_timestamp`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  UNIQUE KEY `idx_source_table_item_id` (`source_table`, `source_item_id`),
+  KEY `idx_process_invalid_inser` (`is_processed`, `is_invalid`, `insert_timestamp`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE t_user_account (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,           -- 用户唯一标识符，主键，自增
-    status INT NOT NULL DEFAULT 0,                           -- 账号状态，默认0
-    main_uid VARCHAR(255) NOT NULL,                        -- oauth uid，唯一
-    main_email VARCHAR(255) NOT NULL DEFAULT '',                    -- 用户邮箱
-    main_provider VARCHAR(255) NOT NULL DEFAULT '',                    -- 用户邮箱
-    aux_uid VARCHAR(255) NOT NULL,                           -- 辅助uid
-    aux_provider VARCHAR(255) NOT NULL DEFAULT '',                           -- 渠道
-    aux_email VARCHAR(255) NOT NULL DEFAULT '',                    -- 用户邮箱
-    create_at DATETIME DEFAULT CURRENT_TIMESTAMP,   -- 账号创建时间，默认为当前时间
-    update_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,  -- 账号最后更新时间，自动更新时间
-    -- Define unique constraints
-    UNIQUE KEY idx_main_uid (main_uid),                    
-    UNIQUE KEY idx_aux_uid (aux_uid),                    
-    KEY idx_main_email (main_email),
-    KEY idx_aux_email (aux_email)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  -- 用户唯一标识符，主键，自增
+  status INT NOT NULL DEFAULT 0,
+  -- 账号状态，默认0
+  main_uid VARCHAR(255) NOT NULL,
+  -- oauth uid，唯一
+  main_email VARCHAR(255) NOT NULL DEFAULT '',
+  -- 用户邮箱
+  main_provider VARCHAR(255) NOT NULL DEFAULT '',
+  -- 用户邮箱
+  aux_uid VARCHAR(255) NOT NULL,
+  -- 辅助uid
+  aux_provider VARCHAR(255) NOT NULL DEFAULT '',
+  -- 渠道
+  aux_email VARCHAR(255) NOT NULL DEFAULT '',
+  -- 用户邮箱
+  create_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  -- 账号创建时间，默认为当前时间
+  update_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  -- 账号最后更新时间，自动更新时间
+  -- Define unique constraints
+  UNIQUE KEY idx_main_uid (main_uid),
+  UNIQUE KEY idx_aux_uid (aux_uid),
+  KEY idx_main_email (main_email),
+  KEY idx_aux_email (aux_email)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE t_user_address (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,              -- 主键，自增，作为唯一标识符
-    uid BIGINT,                                        -- 用户标识符
-    sn INT,                                            -- 地址组序号
-    network INT,                                       -- 网络类型 (1: EVM, 2: StarkNet, 3: Solana, 4: BTC)
-    address VARCHAR(255),                               -- 存储地址，最大长度为 128 字符
-    create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,      -- 创建时间，默认当前时间
-    update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- 更新时间，自动更新为当前时间
-    -- Indexes
-    INDEX idx_uid (uid)                               -- 用户ID建立索引
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  -- 主键，自增，作为唯一标识符
+  uid BIGINT,
+  -- 用户标识符
+  sn INT,
+  -- 地址组序号
+  network INT,
+  -- 网络类型 (1: EVM, 2: StarkNet, 3: Solana, 4: BTC)
+  address VARCHAR(255),
+  -- 存储地址，最大长度为 128 字符
+  create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  -- 创建时间，默认当前时间
+  update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  -- 更新时间，自动更新为当前时间
+  -- Indexes
+  INDEX idx_uid (uid) -- 用户ID建立索引
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+
 -- CREATE TABLE `t_token_info` (
 --     `id` bigint NOT NULL AUTO_INCREMENT,
 --     `update_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -232,7 +414,6 @@ CREATE TABLE t_user_address (
 --     KEY `idx_token_name` (`token_name`),
 --     KEY `idx_insert_timestamp` (`insert_timestamp`)
 -- ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
-
 -- CREATE TABLE `t_tag` (
 --     `id` bigint NOT NULL AUTO_INCREMENT,
 --     `update_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -241,7 +422,6 @@ CREATE TABLE t_user_address (
 --     PRIMARY KEY (`id`),
 --     UNIQUE KEY `idx_tag_name` (`tag_name`)
 -- ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
-
 -- CREATE TABLE `t_object_tag` (
 --     `object_table` varchar(64),
 --     `object_id` bigint NOT NULL,
@@ -251,7 +431,6 @@ CREATE TABLE t_user_address (
 --     PRIMARY KEY (`object_table`, `tag_id`, `object_id`),
 --     KEY `idx_object` (`object_table`, `object_id`)
 -- ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
-
 -- CREATE TABLE `t_transfer` (
 --     `id` bigint NOT NULL AUTO_INCREMENT,
 --     `chainid` int NOT NULL,
@@ -270,13 +449,11 @@ CREATE TABLE t_user_address (
 --     UNIQUE KEY `idx_source_table_item_id` (`source_table`, `source_item_id`),
 --     KEY `idx_process_invalid_inser` (`is_processed`, `is_invalid`, `insert_timestamp`)
 -- ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
-
 -- CREATE TABLE `t_kv` (
 --     `key` varchar(255) NOT NULL,
 --     `value` text,
 --     PRIMARY KEY (`key`)
 -- ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
-
 -- CREATE TABLE `t_event_processed_block` (
 --     `chainid` int NOT NULL,
 --     `appid` int NOT NULL,
@@ -287,7 +464,6 @@ CREATE TABLE t_user_address (
 --     `backtrack_block_number` bigint NOT NULL,
 --     PRIMARY KEY (`chainid`, `appid`)
 -- ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
-
 -- CREATE TABLE `t_gapped_block` (
 --     `chainid` int NOT NULL,
 --     `appid` int NOT NULL,
@@ -297,7 +473,6 @@ CREATE TABLE t_user_address (
 --     `is_processed` int NOT NULL,
 --     PRIMARY KEY (`chainid`, `appid`, `block_number`)
 -- ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
-
 -- CREATE TABLE `t_chain_info` (
 --     `id` bigint NOT NULL AUTO_INCREMENT,
 --     `chainid` varchar(128) NOT NULL,
@@ -336,7 +511,6 @@ CREATE TABLE t_user_address (
 --     UNIQUE KEY `name` (`name`),
 --     UNIQUE KEY `network_code` (`network_code`)
 -- ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
-
 -- CREATE TABLE `t_node_info` (
 --     `id` bigint NOT NULL AUTO_INCREMENT,
 --     `update_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -348,7 +522,6 @@ CREATE TABLE t_user_address (
 --     PRIMARY KEY (`id`),
 --     UNIQUE KEY `chain_id_rpc_url` (`chain_id`, `rpc_url`)
 -- ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
-
 -- CREATE TABLE `t_account` (
 --     `id` bigint NOT NULL AUTO_INCREMENT,
 --     `update_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -359,7 +532,6 @@ CREATE TABLE t_user_address (
 --     `signing_name` varchar(128) DEFAULT NULL,
 --     PRIMARY KEY (`id`)
 -- ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
-
 -- CREATE TABLE `t_dst_transaction` (
 --     `id` bigint NOT NULL AUTO_INCREMENT,
 --     `update_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -383,7 +555,6 @@ CREATE TABLE t_user_address (
 --     KEY `idx_sender_confirm_gen_nonce` (`sender`, `confirmed_gen`, `nonce`),
 --     KEY `transfer_recipient` (`transfer_recipient`)
 -- ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
-
 -- CREATE TABLE `t_dst_transaction_gen` (
 --     `id` bigint NOT NULL AUTO_INCREMENT,
 --     `update_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -404,7 +575,6 @@ CREATE TABLE t_user_address (
 --     PRIMARY KEY (`id`),
 --     KEY `idx_tx_id` (`tx_id`)
 -- ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
-
 -- CREATE TABLE `t_dst_confirmed_queue` (
 --     `id` bigint NOT NULL AUTO_INCREMENT,
 --     `src_action` varchar(64) NOT NULL,
@@ -424,7 +594,6 @@ CREATE TABLE t_user_address (
 --     `is_testnet` int NOT NULL DEFAULT '0',
 --     PRIMARY KEY (`id`)
 -- ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
-
 -- CREATE TABLE `t_token_info` (
 --     `id` bigint NOT NULL AUTO_INCREMENT,
 --     `token_name` varchar(128) NOT NULL,
@@ -435,7 +604,6 @@ CREATE TABLE t_user_address (
 --     PRIMARY KEY (`id`),
 --     UNIQUE KEY `chain_name_token_name` (`chain_name`, `token_name`)
 -- ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
-
 -- CREATE TABLE `t_exchange_info` (
 --     `id` int NOT NULL,
 --     `name` varchar(64) NOT NULL,
@@ -448,7 +616,6 @@ CREATE TABLE t_user_address (
 --     PRIMARY KEY (`id`),
 --     UNIQUE KEY `name` (`name`)
 -- ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
-
 -- CREATE TABLE `t_cctp_support_chain` (
 --     `chainid` int NOT NULL,
 --     `min_value` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
@@ -457,7 +624,6 @@ CREATE TABLE t_user_address (
 --     `message_transmitter` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
 --     PRIMARY KEY (`chainid`)
 -- ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
-
 -- CREATE TABLE `t_src_transaction` (
 --     `id` bigint NOT NULL AUTO_INCREMENT,
 --     `chainid` int NOT NULL,
@@ -519,7 +685,6 @@ CREATE TABLE t_user_address (
 --     KEY `null_dstchainid_query` (`dst_chainid`, `is_testnet`),
 --     KEY `insert_timestamp` (`insert_timestamp`)
 -- ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
-
 -- CREATE TABLE `t_lp_info` (
 --     `version` int NOT NULL,
 --     `token_name` varchar(32) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
@@ -545,7 +710,6 @@ CREATE TABLE t_user_address (
 --         `to_chain`
 --     )
 -- ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
-
 -- CREATE TABLE `t_maker_address_groups` (
 --     `id` bigint NOT NULL AUTO_INCREMENT,
 --     `group_name` varchar(128) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
@@ -554,7 +718,6 @@ CREATE TABLE t_user_address (
 --     `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 --     PRIMARY KEY (`id`)
 -- ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
-
 -- CREATE TABLE `t_maker_addresses` (
 --     `id` bigint NOT NULL AUTO_INCREMENT,
 --     `group_id` bigint NOT NULL DEFAULT '0',
@@ -565,7 +728,6 @@ CREATE TABLE t_user_address (
 --     PRIMARY KEY (`id`),
 --     UNIQUE KEY `uk_backend_address` (`backend`, `address`)
 -- ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
-
 -- CREATE TABLE `t_bridge_fee_decimal` (
 --     `token` varchar(32) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
 --     `keep_decimal` int NOT NULL,
@@ -573,7 +735,6 @@ CREATE TABLE t_user_address (
 --     `insert_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 --     PRIMARY KEY (`token`)
 -- ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
-
 -- CREATE TABLE `t_dynamic_bridge_fee` (
 --     `token_name` varchar(32) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
 --     `from_chain` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
@@ -589,7 +750,6 @@ CREATE TABLE t_user_address (
 --     PRIMARY KEY (`token_name`, `from_chain`, `to_chain`),
 --     UNIQUE KEY `token_name_from_chain_to_chain` (`token_name`, `from_chain`, `to_chain`)
 -- ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
-
 -- CREATE TABLE `t_dynamic_dtc` (
 --     `token_name` varchar(32) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
 --     `from_chain` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,

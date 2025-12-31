@@ -24,12 +24,12 @@ func main() {
 	}
 	Dogen(db, "../query", "../model")
 
-	qtdsn := "postgresql://postgres:1@127.0.0.1:5432/db_cs" // Example: "user:password@tcp(localhost:3306)/dbname"
-	qtdb, err := gorm.Open(postgres.Open(qtdsn), &gorm.Config{})
+	pdsn := "postgresql://postgres:1@127.0.0.1:5432/db_cs" // Example: "user:password@tcp(localhost:3306)/dbname"
+	pdb, err := gorm.Open(postgres.Open(pdsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("failed to connect to the questdb: %v", err)
 	}
-	Dogen(qtdb, "../qtquery", "../qtmodel")
+	Dogen(pdb, "../pquery", "../pmodel")
 
 	token := model.TTokenInfo{
 		ID:              1,
