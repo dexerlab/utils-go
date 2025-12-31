@@ -10,6 +10,7 @@ import (
 	"github.com/dexerlab/utils-go/dal/model"
 	"github.com/shopspring/decimal"
 	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gen"
 	"gorm.io/gorm"
 )
@@ -22,6 +23,13 @@ func main() {
 		log.Fatalf("failed to connect to the database: %v", err)
 	}
 	Dogen(db, "../query", "../model")
+
+	qtdsn := "postgresql://postgres:1@127.0.0.1:5432/db_cs" // Example: "user:password@tcp(localhost:3306)/dbname"
+	qtdb, err := gorm.Open(postgres.Open(qtdsn), &gorm.Config{})
+	if err != nil {
+		log.Fatalf("failed to connect to the questdb: %v", err)
+	}
+	Dogen(qtdb, "../qtquery", "../qtmodel")
 
 	token := model.TTokenInfo{
 		ID:              1,
