@@ -204,13 +204,21 @@ CREATE TABLE t_kline_5m (
 );
 
 CREATE TABLE t_kline_15m (LIKE t_kline_5m INCLUDING ALL);
+
 CREATE TABLE t_kline_30m (LIKE t_kline_5m INCLUDING ALL);
+
 CREATE TABLE t_kline_1h (LIKE t_kline_5m INCLUDING ALL);
+
 CREATE TABLE t_kline_4h (LIKE t_kline_5m INCLUDING ALL);
+
 CREATE TABLE t_kline_12h (LIKE t_kline_5m INCLUDING ALL);
+
 CREATE TABLE t_kline_1d (LIKE t_kline_5m INCLUDING ALL);
+
 CREATE TABLE t_kline_1w (LIKE t_kline_5m INCLUDING ALL);
+
 CREATE TABLE t_kline_1mo (LIKE t_kline_5m INCLUDING ALL);
+
 CREATE TABLE t_kline_1y (LIKE t_kline_5m INCLUDING ALL);
 
 CREATE TABLE `t_chain_info` (
