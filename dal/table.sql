@@ -8,7 +8,10 @@ CREATE TABLE trades (
   -- Buy (true), Sell (false)
   price DOUBLE PRECISION,
   -- 'double' is DOUBLE PRECISION in Postgres
-  amount DOUBLE PRECISION -- Recommended for tokens (as we discussed)
+  amount0 DOUBLE PRECISION,
+  -- Recommended for tokens (as we discussed)
+  amount1 DOUBLE PRECISION,
+  amountu DOUBLE PRECISION
 ) timestamp(ts) PARTITION BY HOUR TTL 10 DAYS DEDUP UPSERT KEYS(ts, pool_id) WAL;
 
 -- 5 Minute
@@ -20,7 +23,9 @@ CREATE MATERIALIZED VIEW kline_5m AS (
     max(price) high,
     min(price) low,
     last(price) close,
-    sum(amount) volume
+    sum(amount0) volume0,
+    sum(amount1) volume1,
+    sum(amountu) volumeu
   FROM
     trades SAMPLE BY 5m ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY DAY WAL;
@@ -34,7 +39,9 @@ CREATE MATERIALIZED VIEW kline_15m AS (
     max(price) high,
     min(price) low,
     last(price) close,
-    sum(amount) volume
+    sum(amount0) volume0,
+    sum(amount1) volume1,
+    sum(amountu) volumeu
   FROM
     trades SAMPLE BY 15m ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY DAY WAL;
@@ -48,7 +55,9 @@ CREATE MATERIALIZED VIEW kline_30m AS (
     max(price) high,
     min(price) low,
     last(price) close,
-    sum(amount) volume
+    sum(amount0) volume0,
+    sum(amount1) volume1,
+    sum(amountu) volumeu
   FROM
     trades SAMPLE BY 30m ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY DAY WAL;
@@ -62,10 +71,12 @@ CREATE MATERIALIZED VIEW kline_1h AS (
     max(price) high,
     min(price) low,
     last(price) close,
-    sum(amount) volume
+    sum(amount0) volume0,
+    sum(amount1) volume1,
+    sum(amountu) volumeu
   FROM
     trades SAMPLE BY 1h ALIGN TO CALENDAR
-) timestamp(ts) PARTITION BY DAY WAL;
+) timestamp(ts) PARTITION BY WEEK WAL;
 
 -- 4 Hour
 CREATE MATERIALIZED VIEW kline_4h AS (
@@ -76,10 +87,12 @@ CREATE MATERIALIZED VIEW kline_4h AS (
     max(price) high,
     min(price) low,
     last(price) close,
-    sum(amount) volume
+    sum(amount0) volume0,
+    sum(amount1) volume1,
+    sum(amountu) volumeu
   FROM
     trades SAMPLE BY 4h ALIGN TO CALENDAR
-) timestamp(ts) PARTITION BY MONTH WAL;
+) timestamp(ts) PARTITION BY WEEK WAL;
 
 -- 12 Hour
 CREATE MATERIALIZED VIEW kline_12h AS (
@@ -90,7 +103,9 @@ CREATE MATERIALIZED VIEW kline_12h AS (
     max(price) high,
     min(price) low,
     last(price) close,
-    sum(amount) volume
+    sum(amount0) volume0,
+    sum(amount1) volume1,
+    sum(amountu) volumeu
   FROM
     trades SAMPLE BY 12h ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY MONTH WAL;
@@ -104,10 +119,12 @@ CREATE MATERIALIZED VIEW kline_1d AS (
     max(price) high,
     min(price) low,
     last(price) close,
-    sum(amount) volume
+    sum(amount0) volume0,
+    sum(amount1) volume1,
+    sum(amountu) volumeu
   FROM
     trades SAMPLE BY 1d ALIGN TO CALENDAR
-) timestamp(ts) PARTITION BY YEAR WAL;
+) timestamp(ts) PARTITION BY MONTH WAL;
 
 -- 1 Week
 CREATE MATERIALIZED VIEW kline_1w AS (
@@ -118,7 +135,9 @@ CREATE MATERIALIZED VIEW kline_1w AS (
     max(price) high,
     min(price) low,
     last(price) close,
-    sum(amount) volume
+    sum(amount0) volume0,
+    sum(amount1) volume1,
+    sum(amountu) volumeu
   FROM
     trades SAMPLE BY 1w ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY YEAR WAL;
@@ -132,7 +151,9 @@ CREATE MATERIALIZED VIEW kline_1mo AS (
     max(price) high,
     min(price) low,
     last(price) close,
-    sum(amount) volume
+    sum(amount0) volume0,
+    sum(amount1) volume1,
+    sum(amountu) volumeu
   FROM
     trades SAMPLE BY 1M ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY YEAR WAL;
@@ -146,7 +167,9 @@ CREATE MATERIALIZED VIEW kline_1y AS (
     max(price) high,
     min(price) low,
     last(price) close,
-    sum(amount) volume
+    sum(amount0) volume0,
+    sum(amount1) volume1,
+    sum(amountu) volumeu
   FROM
     trades SAMPLE BY 1y ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY YEAR WAL;
@@ -161,7 +184,10 @@ CREATE TABLE trades (
   -- Buy (true), Sell (false)
   price DOUBLE PRECISION,
   -- 'double' is DOUBLE PRECISION in Postgres
-  amount DOUBLE PRECISION -- Recommended for tokens (as we discussed)
+  amount0 DOUBLE PRECISION,
+  -- Recommended for tokens (as we discussed)
+  amount1 DOUBLE PRECISION,
+  amountu DOUBLE PRECISION
 );
 
 CREATE TABLE `t_chain_info` (
