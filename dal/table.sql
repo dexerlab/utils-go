@@ -1,5 +1,5 @@
 -- questdb
-CREATE TABLE trades (
+CREATE TABLE t_trade (
   ts TIMESTAMP,
   -- Time of the trade
   pool_id BIGINT,
@@ -7,15 +7,15 @@ CREATE TABLE trades (
   is_buy BOOLEAN,
   -- Buy (true), Sell (false)
   price DOUBLE PRECISION,
-  -- 'double' is DOUBLE PRECISION in Postgres
+  price01 DOUBLE PRECISION,
+  -- price in u
   amount0 DOUBLE PRECISION,
-  -- Recommended for tokens (as we discussed)
   amount1 DOUBLE PRECISION,
-  amountu DOUBLE PRECISION
-) timestamp(ts) PARTITION BY HOUR TTL 10 DAYS DEDUP UPSERT KEYS(ts, pool_id) WAL;
+  amount DOUBLE PRECISION -- amount in u
+) timestamp(ts) PARTITION BY HOUR TTL 10 DAY WAL DEDUP UPSERT KEYS(ts, pool_id);
 
 -- 5 Minute
-CREATE MATERIALIZED VIEW kline_5m AS (
+CREATE MATERIALIZED VIEW t_kline_5m AS (
   SELECT
     ts,
     pool_id,
@@ -25,13 +25,13 @@ CREATE MATERIALIZED VIEW kline_5m AS (
     last(price) close,
     sum(amount0) volume0,
     sum(amount1) volume1,
-    sum(amountu) volumeu
+    sum(amount) volume
   FROM
-    trades SAMPLE BY 5m ALIGN TO CALENDAR
-) timestamp(ts) PARTITION BY DAY WAL;
+    t_trade SAMPLE BY 5m ALIGN TO CALENDAR
+) timestamp(ts) PARTITION BY DAY;
 
 -- 15 Minute
-CREATE MATERIALIZED VIEW kline_15m AS (
+CREATE MATERIALIZED VIEW t_kline_15m AS (
   SELECT
     ts,
     pool_id,
@@ -41,13 +41,13 @@ CREATE MATERIALIZED VIEW kline_15m AS (
     last(price) close,
     sum(amount0) volume0,
     sum(amount1) volume1,
-    sum(amountu) volumeu
+    sum(amount) volume
   FROM
-    trades SAMPLE BY 15m ALIGN TO CALENDAR
-) timestamp(ts) PARTITION BY DAY WAL;
+    t_trade SAMPLE BY 15m ALIGN TO CALENDAR
+) timestamp(ts) PARTITION BY DAY;
 
 -- 30 Minute
-CREATE MATERIALIZED VIEW kline_30m AS (
+CREATE MATERIALIZED VIEW t_kline_30m AS (
   SELECT
     ts,
     pool_id,
@@ -57,13 +57,13 @@ CREATE MATERIALIZED VIEW kline_30m AS (
     last(price) close,
     sum(amount0) volume0,
     sum(amount1) volume1,
-    sum(amountu) volumeu
+    sum(amount) volume
   FROM
-    trades SAMPLE BY 30m ALIGN TO CALENDAR
-) timestamp(ts) PARTITION BY DAY WAL;
+    t_trade SAMPLE BY 30m ALIGN TO CALENDAR
+) timestamp(ts) PARTITION BY DAY;
 
 -- 1 Hour
-CREATE MATERIALIZED VIEW kline_1h AS (
+CREATE MATERIALIZED VIEW t_kline_1h AS (
   SELECT
     ts,
     pool_id,
@@ -73,13 +73,13 @@ CREATE MATERIALIZED VIEW kline_1h AS (
     last(price) close,
     sum(amount0) volume0,
     sum(amount1) volume1,
-    sum(amountu) volumeu
+    sum(amount) volume
   FROM
-    trades SAMPLE BY 1h ALIGN TO CALENDAR
-) timestamp(ts) PARTITION BY WEEK WAL;
+    t_trade SAMPLE BY 1h ALIGN TO CALENDAR
+) timestamp(ts) PARTITION BY WEEK;
 
 -- 4 Hour
-CREATE MATERIALIZED VIEW kline_4h AS (
+CREATE MATERIALIZED VIEW t_kline_4h AS (
   SELECT
     ts,
     pool_id,
@@ -89,13 +89,13 @@ CREATE MATERIALIZED VIEW kline_4h AS (
     last(price) close,
     sum(amount0) volume0,
     sum(amount1) volume1,
-    sum(amountu) volumeu
+    sum(amount) volume
   FROM
-    trades SAMPLE BY 4h ALIGN TO CALENDAR
-) timestamp(ts) PARTITION BY WEEK WAL;
+    t_trade SAMPLE BY 4h ALIGN TO CALENDAR
+) timestamp(ts) PARTITION BY WEEK;
 
 -- 12 Hour
-CREATE MATERIALIZED VIEW kline_12h AS (
+CREATE MATERIALIZED VIEW t_kline_12h AS (
   SELECT
     ts,
     pool_id,
@@ -105,13 +105,13 @@ CREATE MATERIALIZED VIEW kline_12h AS (
     last(price) close,
     sum(amount0) volume0,
     sum(amount1) volume1,
-    sum(amountu) volumeu
+    sum(amount) volume
   FROM
-    trades SAMPLE BY 12h ALIGN TO CALENDAR
-) timestamp(ts) PARTITION BY MONTH WAL;
+    t_trade SAMPLE BY 12h ALIGN TO CALENDAR
+) timestamp(ts) PARTITION BY MONTH;
 
 -- 1 Day
-CREATE MATERIALIZED VIEW kline_1d AS (
+CREATE MATERIALIZED VIEW t_kline_1d AS (
   SELECT
     ts,
     pool_id,
@@ -121,13 +121,13 @@ CREATE MATERIALIZED VIEW kline_1d AS (
     last(price) close,
     sum(amount0) volume0,
     sum(amount1) volume1,
-    sum(amountu) volumeu
+    sum(amount) volume
   FROM
-    trades SAMPLE BY 1d ALIGN TO CALENDAR
-) timestamp(ts) PARTITION BY MONTH WAL;
+    t_trade SAMPLE BY 1d ALIGN TO CALENDAR
+) timestamp(ts) PARTITION BY MONTH;
 
 -- 1 Week
-CREATE MATERIALIZED VIEW kline_1w AS (
+CREATE MATERIALIZED VIEW t_kline_1w AS (
   SELECT
     ts,
     pool_id,
@@ -137,13 +137,13 @@ CREATE MATERIALIZED VIEW kline_1w AS (
     last(price) close,
     sum(amount0) volume0,
     sum(amount1) volume1,
-    sum(amountu) volumeu
+    sum(amount) volume
   FROM
-    trades SAMPLE BY 1w ALIGN TO CALENDAR
-) timestamp(ts) PARTITION BY YEAR WAL;
+    t_trade SAMPLE BY 1w ALIGN TO CALENDAR
+) timestamp(ts) PARTITION BY YEAR;
 
 -- 1 Month
-CREATE MATERIALIZED VIEW kline_1mo AS (
+CREATE MATERIALIZED VIEW t_kline_1mo AS (
   SELECT
     ts,
     pool_id,
@@ -153,13 +153,13 @@ CREATE MATERIALIZED VIEW kline_1mo AS (
     last(price) close,
     sum(amount0) volume0,
     sum(amount1) volume1,
-    sum(amountu) volumeu
+    sum(amount) volume
   FROM
-    trades SAMPLE BY 1M ALIGN TO CALENDAR
-) timestamp(ts) PARTITION BY YEAR WAL;
+    t_trade SAMPLE BY 1M ALIGN TO CALENDAR
+) timestamp(ts) PARTITION BY YEAR;
 
 -- 1 Year
-CREATE MATERIALIZED VIEW kline_1y AS (
+CREATE MATERIALIZED VIEW t_kline_1y AS (
   SELECT
     ts,
     pool_id,
@@ -169,26 +169,49 @@ CREATE MATERIALIZED VIEW kline_1y AS (
     last(price) close,
     sum(amount0) volume0,
     sum(amount1) volume1,
-    sum(amountu) volumeu
+    sum(amount) volume
   FROM
-    trades SAMPLE BY 1y ALIGN TO CALENDAR
-) timestamp(ts) PARTITION BY YEAR WAL;
+    t_trade SAMPLE BY 1y ALIGN TO CALENDAR
+) timestamp(ts) PARTITION BY YEAR;
 
+-- ***********************
 -- postgresql for questdb
-CREATE TABLE trades (
-  ts TIMESTAMP,
+-- ***********************
+CREATE TABLE t_trade (
+  ts TIMESTAMP NOT NULL,
   -- Time of the trade
-  pool_id BIGINT,
+  pool_id BIGINT NOT NULL,
   -- 'long' does not exist in Postgres, use BIGINT
-  is_buy BOOLEAN,
+  is_buy BOOLEAN NOT NULL,
   -- Buy (true), Sell (false)
-  price DOUBLE PRECISION,
-  -- 'double' is DOUBLE PRECISION in Postgres
-  amount0 DOUBLE PRECISION,
-  -- Recommended for tokens (as we discussed)
-  amount1 DOUBLE PRECISION,
-  amountu DOUBLE PRECISION
+  price DOUBLE PRECISION NOT NULL,
+  price01 DOUBLE PRECISION NOT NULL,
+  amount0 DOUBLE PRECISION NOT NULL,
+  amount1 DOUBLE PRECISION NOT NULL,
+  amount DOUBLE PRECISION NOT NULL
 );
+
+CREATE TABLE t_kline_5m (
+  ts TIMESTAMP NOT NULL,
+  pool_id BIGINT NOT NULL,
+  open DOUBLE PRECISION NOT NULL,
+  high DOUBLE PRECISION NOT NULL,
+  low DOUBLE PRECISION NOT NULL,
+  close DOUBLE PRECISION NOT NULL,
+  volume0 DOUBLE PRECISION NOT NULL,
+  volume1 DOUBLE PRECISION NOT NULL,
+  volume DOUBLE PRECISION NOT NULL
+);
+
+CREATE TABLE t_kline_15m (LIKE t_kline_5m INCLUDING ALL);
+CREATE TABLE t_kline_30m (LIKE t_kline_5m INCLUDING ALL);
+CREATE TABLE t_kline_1h (LIKE t_kline_5m INCLUDING ALL);
+CREATE TABLE t_kline_4h (LIKE t_kline_5m INCLUDING ALL);
+CREATE TABLE t_kline_12h (LIKE t_kline_5m INCLUDING ALL);
+CREATE TABLE t_kline_1d (LIKE t_kline_5m INCLUDING ALL);
+CREATE TABLE t_kline_1w (LIKE t_kline_5m INCLUDING ALL);
+CREATE TABLE t_kline_1mo (LIKE t_kline_5m INCLUDING ALL);
+CREATE TABLE t_kline_1y (LIKE t_kline_5m INCLUDING ALL);
 
 CREATE TABLE `t_chain_info` (
   `id` bigint NOT NULL AUTO_INCREMENT,
