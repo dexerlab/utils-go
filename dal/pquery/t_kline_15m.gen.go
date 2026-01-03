@@ -29,13 +29,22 @@ func newTKline15M(db *gorm.DB, opts ...gen.DOOption) tKline15M {
 	_tKline15M.ALL = field.NewAsterisk(tableName)
 	_tKline15M.Ts = field.NewTime(tableName, "ts")
 	_tKline15M.PoolID = field.NewInt64(tableName, "pool_id")
-	_tKline15M.Open = field.NewFloat64(tableName, "open")
-	_tKline15M.High = field.NewFloat64(tableName, "high")
-	_tKline15M.Low = field.NewFloat64(tableName, "low")
-	_tKline15M.Close = field.NewFloat64(tableName, "close")
-	_tKline15M.Volume0 = field.NewFloat64(tableName, "volume0")
-	_tKline15M.Volume1 = field.NewFloat64(tableName, "volume1")
-	_tKline15M.Volume = field.NewFloat64(tableName, "volume")
+	_tKline15M.Openu = field.NewFloat64(tableName, "openu")
+	_tKline15M.Highu = field.NewFloat64(tableName, "highu")
+	_tKline15M.Lowu = field.NewFloat64(tableName, "lowu")
+	_tKline15M.Closeu = field.NewFloat64(tableName, "closeu")
+	_tKline15M.Open01 = field.NewFloat64(tableName, "open01")
+	_tKline15M.High01 = field.NewFloat64(tableName, "high01")
+	_tKline15M.Low01 = field.NewFloat64(tableName, "low01")
+	_tKline15M.Close01 = field.NewFloat64(tableName, "close01")
+	_tKline15M.Buy0 = field.NewFloat64(tableName, "buy0")
+	_tKline15M.Sell0 = field.NewFloat64(tableName, "sell0")
+	_tKline15M.Buy1 = field.NewFloat64(tableName, "buy1")
+	_tKline15M.Sell1 = field.NewFloat64(tableName, "sell1")
+	_tKline15M.Buyu = field.NewFloat64(tableName, "buyu")
+	_tKline15M.Sellu = field.NewFloat64(tableName, "sellu")
+	_tKline15M.Buys = field.NewInt64(tableName, "buys")
+	_tKline15M.Sells = field.NewInt64(tableName, "sells")
 
 	_tKline15M.fillFieldMap()
 
@@ -48,13 +57,22 @@ type tKline15M struct {
 	ALL     field.Asterisk
 	Ts      field.Time
 	PoolID  field.Int64
-	Open    field.Float64
-	High    field.Float64
-	Low     field.Float64
-	Close   field.Float64
-	Volume0 field.Float64
-	Volume1 field.Float64
-	Volume  field.Float64
+	Openu   field.Float64
+	Highu   field.Float64
+	Lowu    field.Float64
+	Closeu  field.Float64
+	Open01  field.Float64
+	High01  field.Float64
+	Low01   field.Float64
+	Close01 field.Float64
+	Buy0    field.Float64
+	Sell0   field.Float64
+	Buy1    field.Float64
+	Sell1   field.Float64
+	Buyu    field.Float64
+	Sellu   field.Float64
+	Buys    field.Int64
+	Sells   field.Int64
 
 	fieldMap map[string]field.Expr
 }
@@ -73,13 +91,22 @@ func (t *tKline15M) updateTableName(table string) *tKline15M {
 	t.ALL = field.NewAsterisk(table)
 	t.Ts = field.NewTime(table, "ts")
 	t.PoolID = field.NewInt64(table, "pool_id")
-	t.Open = field.NewFloat64(table, "open")
-	t.High = field.NewFloat64(table, "high")
-	t.Low = field.NewFloat64(table, "low")
-	t.Close = field.NewFloat64(table, "close")
-	t.Volume0 = field.NewFloat64(table, "volume0")
-	t.Volume1 = field.NewFloat64(table, "volume1")
-	t.Volume = field.NewFloat64(table, "volume")
+	t.Openu = field.NewFloat64(table, "openu")
+	t.Highu = field.NewFloat64(table, "highu")
+	t.Lowu = field.NewFloat64(table, "lowu")
+	t.Closeu = field.NewFloat64(table, "closeu")
+	t.Open01 = field.NewFloat64(table, "open01")
+	t.High01 = field.NewFloat64(table, "high01")
+	t.Low01 = field.NewFloat64(table, "low01")
+	t.Close01 = field.NewFloat64(table, "close01")
+	t.Buy0 = field.NewFloat64(table, "buy0")
+	t.Sell0 = field.NewFloat64(table, "sell0")
+	t.Buy1 = field.NewFloat64(table, "buy1")
+	t.Sell1 = field.NewFloat64(table, "sell1")
+	t.Buyu = field.NewFloat64(table, "buyu")
+	t.Sellu = field.NewFloat64(table, "sellu")
+	t.Buys = field.NewInt64(table, "buys")
+	t.Sells = field.NewInt64(table, "sells")
 
 	t.fillFieldMap()
 
@@ -106,16 +133,25 @@ func (t *tKline15M) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (t *tKline15M) fillFieldMap() {
-	t.fieldMap = make(map[string]field.Expr, 9)
+	t.fieldMap = make(map[string]field.Expr, 18)
 	t.fieldMap["ts"] = t.Ts
 	t.fieldMap["pool_id"] = t.PoolID
-	t.fieldMap["open"] = t.Open
-	t.fieldMap["high"] = t.High
-	t.fieldMap["low"] = t.Low
-	t.fieldMap["close"] = t.Close
-	t.fieldMap["volume0"] = t.Volume0
-	t.fieldMap["volume1"] = t.Volume1
-	t.fieldMap["volume"] = t.Volume
+	t.fieldMap["openu"] = t.Openu
+	t.fieldMap["highu"] = t.Highu
+	t.fieldMap["lowu"] = t.Lowu
+	t.fieldMap["closeu"] = t.Closeu
+	t.fieldMap["open01"] = t.Open01
+	t.fieldMap["high01"] = t.High01
+	t.fieldMap["low01"] = t.Low01
+	t.fieldMap["close01"] = t.Close01
+	t.fieldMap["buy0"] = t.Buy0
+	t.fieldMap["sell0"] = t.Sell0
+	t.fieldMap["buy1"] = t.Buy1
+	t.fieldMap["sell1"] = t.Sell1
+	t.fieldMap["buyu"] = t.Buyu
+	t.fieldMap["sellu"] = t.Sellu
+	t.fieldMap["buys"] = t.Buys
+	t.fieldMap["sells"] = t.Sells
 }
 
 func (t tKline15M) clone(db *gorm.DB) tKline15M {

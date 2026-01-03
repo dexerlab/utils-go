@@ -12,15 +12,24 @@ const TableNameTKline1H = "t_kline_1h"
 
 // TKline1H mapped from table <t_kline_1h>
 type TKline1H struct {
-	Ts      time.Time `gorm:"column:ts;type:timestamp without time zone" json:"ts"`
-	PoolID  int64     `gorm:"column:pool_id;type:bigint" json:"pool_id,string"`
-	Open    float64   `gorm:"column:open;type:double precision" json:"open"`
-	High    float64   `gorm:"column:high;type:double precision" json:"high"`
-	Low     float64   `gorm:"column:low;type:double precision" json:"low"`
-	Close   float64   `gorm:"column:close;type:double precision" json:"close"`
-	Volume0 float64   `gorm:"column:volume0;type:double precision" json:"volume0"`
-	Volume1 float64   `gorm:"column:volume1;type:double precision" json:"volume1"`
-	Volume  float64   `gorm:"column:volume;type:double precision" json:"volume"`
+	Ts      time.Time `gorm:"column:ts;type:timestamp without time zone;not null" json:"ts"`
+	PoolID  int64     `gorm:"column:pool_id;type:bigint;not null" json:"pool_id,string"`
+	Openu   float64   `gorm:"column:openu;type:double precision;not null" json:"openu"`
+	Highu   float64   `gorm:"column:highu;type:double precision;not null" json:"highu"`
+	Lowu    float64   `gorm:"column:lowu;type:double precision;not null" json:"lowu"`
+	Closeu  float64   `gorm:"column:closeu;type:double precision;not null" json:"closeu"`
+	Open01  float64   `gorm:"column:open01;type:double precision;not null" json:"open01"`
+	High01  float64   `gorm:"column:high01;type:double precision;not null" json:"high01"`
+	Low01   float64   `gorm:"column:low01;type:double precision;not null" json:"low01"`
+	Close01 float64   `gorm:"column:close01;type:double precision;not null" json:"close01"`
+	Buy0    float64   `gorm:"column:buy0;type:double precision;not null" json:"buy0"`
+	Sell0   float64   `gorm:"column:sell0;type:double precision;not null" json:"sell0"`
+	Buy1    float64   `gorm:"column:buy1;type:double precision;not null" json:"buy1"`
+	Sell1   float64   `gorm:"column:sell1;type:double precision;not null" json:"sell1"`
+	Buyu    float64   `gorm:"column:buyu;type:double precision;not null" json:"buyu"`
+	Sellu   float64   `gorm:"column:sellu;type:double precision;not null" json:"sellu"`
+	Buys    int64     `gorm:"column:buys;type:bigint;not null" json:"buys,string"`
+	Sells   int64     `gorm:"column:sells;type:bigint;not null" json:"sells,string"`
 }
 
 // TableName TKline1H's table name

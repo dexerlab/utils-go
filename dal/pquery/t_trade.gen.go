@@ -30,11 +30,11 @@ func newTTrade(db *gorm.DB, opts ...gen.DOOption) tTrade {
 	_tTrade.Ts = field.NewTime(tableName, "ts")
 	_tTrade.PoolID = field.NewInt64(tableName, "pool_id")
 	_tTrade.IsBuy = field.NewBool(tableName, "is_buy")
-	_tTrade.Price = field.NewFloat64(tableName, "price")
+	_tTrade.Priceu = field.NewFloat64(tableName, "priceu")
 	_tTrade.Price01 = field.NewFloat64(tableName, "price01")
 	_tTrade.Amount0 = field.NewFloat64(tableName, "amount0")
 	_tTrade.Amount1 = field.NewFloat64(tableName, "amount1")
-	_tTrade.Amount = field.NewFloat64(tableName, "amount")
+	_tTrade.Amountu = field.NewFloat64(tableName, "amountu")
 
 	_tTrade.fillFieldMap()
 
@@ -48,11 +48,11 @@ type tTrade struct {
 	Ts      field.Time
 	PoolID  field.Int64
 	IsBuy   field.Bool
-	Price   field.Float64
+	Priceu  field.Float64
 	Price01 field.Float64
 	Amount0 field.Float64
 	Amount1 field.Float64
-	Amount  field.Float64
+	Amountu field.Float64
 
 	fieldMap map[string]field.Expr
 }
@@ -72,11 +72,11 @@ func (t *tTrade) updateTableName(table string) *tTrade {
 	t.Ts = field.NewTime(table, "ts")
 	t.PoolID = field.NewInt64(table, "pool_id")
 	t.IsBuy = field.NewBool(table, "is_buy")
-	t.Price = field.NewFloat64(table, "price")
+	t.Priceu = field.NewFloat64(table, "priceu")
 	t.Price01 = field.NewFloat64(table, "price01")
 	t.Amount0 = field.NewFloat64(table, "amount0")
 	t.Amount1 = field.NewFloat64(table, "amount1")
-	t.Amount = field.NewFloat64(table, "amount")
+	t.Amountu = field.NewFloat64(table, "amountu")
 
 	t.fillFieldMap()
 
@@ -105,11 +105,11 @@ func (t *tTrade) fillFieldMap() {
 	t.fieldMap["ts"] = t.Ts
 	t.fieldMap["pool_id"] = t.PoolID
 	t.fieldMap["is_buy"] = t.IsBuy
-	t.fieldMap["price"] = t.Price
+	t.fieldMap["priceu"] = t.Priceu
 	t.fieldMap["price01"] = t.Price01
 	t.fieldMap["amount0"] = t.Amount0
 	t.fieldMap["amount1"] = t.Amount1
-	t.fieldMap["amount"] = t.Amount
+	t.fieldMap["amountu"] = t.Amountu
 }
 
 func (t tTrade) clone(db *gorm.DB) tTrade {

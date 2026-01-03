@@ -6,26 +6,42 @@ CREATE TABLE t_trade (
   -- 'long' does not exist in Postgres, use BIGINT
   is_buy BOOLEAN,
   -- Buy (true), Sell (false)
-  price DOUBLE PRECISION,
+  priceu DOUBLE PRECISION,
   price01 DOUBLE PRECISION,
-  -- price in u
+  -- priceu in u
   amount0 DOUBLE PRECISION,
   amount1 DOUBLE PRECISION,
-  amount DOUBLE PRECISION -- amount in u
+  amountu DOUBLE PRECISION -- amountu in u
 ) timestamp(ts) PARTITION BY HOUR TTL 10 DAY WAL DEDUP UPSERT KEYS(ts, pool_id);
+
+/*
+SELECT 'DROP MATERIALIZED VIEW ' || table_name || ';' 
+FROM tables() 
+WHERE table_name LIKE 't_kline_%';
+ concat('DROP TABLE ', table_name, ';') 
+ */
 
 -- 5 Minute
 CREATE MATERIALIZED VIEW t_kline_5m AS (
   SELECT
     ts,
     pool_id,
-    first(price) open,
-    max(price) high,
-    min(price) low,
-    last(price) close,
-    sum(amount0) volume0,
-    sum(amount1) volume1,
-    sum(amount) volume
+    first(priceu) openu,
+    max(priceu) highu,
+    min(priceu) lowu,
+    last(priceu) closeu,
+    first(price01) open01,
+    max(price01) high01,
+    min(price01) low01,
+    last(price01) close01,
+    sum(amount0 * is_buy :: int) buy0,
+    sum(amount0 * (NOT is_buy) :: int) sell0,
+    sum(amount1 * is_buy :: int) buy1,
+    sum(amount1 * (NOT is_buy) :: int) sell1,
+    sum(amountu * is_buy :: int) buyu,
+    sum(amountu * (NOT is_buy) :: int) sellu,
+    sum(is_buy :: int) AS buys,
+    sum((NOT is_buy) :: int) AS sells
   FROM
     t_trade SAMPLE BY 5m ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY DAY;
@@ -35,13 +51,22 @@ CREATE MATERIALIZED VIEW t_kline_15m AS (
   SELECT
     ts,
     pool_id,
-    first(price) open,
-    max(price) high,
-    min(price) low,
-    last(price) close,
-    sum(amount0) volume0,
-    sum(amount1) volume1,
-    sum(amount) volume
+    first(priceu) openu,
+    max(priceu) highu,
+    min(priceu) lowu,
+    last(priceu) closeu,
+    first(price01) open01,
+    max(price01) high01,
+    min(price01) low01,
+    last(price01) close01,
+    sum(amount0 * is_buy :: int) buy0,
+    sum(amount0 * (NOT is_buy) :: int) sell0,
+    sum(amount1 * is_buy :: int) buy1,
+    sum(amount1 * (NOT is_buy) :: int) sell1,
+    sum(amountu * is_buy :: int) buyu,
+    sum(amountu * (NOT is_buy) :: int) sellu,
+    sum(is_buy :: int) AS buys,
+    sum((NOT is_buy) :: int) AS sells
   FROM
     t_trade SAMPLE BY 15m ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY DAY;
@@ -51,13 +76,22 @@ CREATE MATERIALIZED VIEW t_kline_30m AS (
   SELECT
     ts,
     pool_id,
-    first(price) open,
-    max(price) high,
-    min(price) low,
-    last(price) close,
-    sum(amount0) volume0,
-    sum(amount1) volume1,
-    sum(amount) volume
+    first(priceu) openu,
+    max(priceu) highu,
+    min(priceu) lowu,
+    last(priceu) closeu,
+    first(price01) open01,
+    max(price01) high01,
+    min(price01) low01,
+    last(price01) close01,
+    sum(amount0 * is_buy :: int) buy0,
+    sum(amount0 * (NOT is_buy) :: int) sell0,
+    sum(amount1 * is_buy :: int) buy1,
+    sum(amount1 * (NOT is_buy) :: int) sell1,
+    sum(amountu * is_buy :: int) buyu,
+    sum(amountu * (NOT is_buy) :: int) sellu,
+    sum(is_buy :: int) AS buys,
+    sum((NOT is_buy) :: int) AS sells
   FROM
     t_trade SAMPLE BY 30m ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY DAY;
@@ -67,13 +101,22 @@ CREATE MATERIALIZED VIEW t_kline_1h AS (
   SELECT
     ts,
     pool_id,
-    first(price) open,
-    max(price) high,
-    min(price) low,
-    last(price) close,
-    sum(amount0) volume0,
-    sum(amount1) volume1,
-    sum(amount) volume
+    first(priceu) openu,
+    max(priceu) highu,
+    min(priceu) lowu,
+    last(priceu) closeu,
+    first(price01) open01,
+    max(price01) high01,
+    min(price01) low01,
+    last(price01) close01,
+    sum(amount0 * is_buy :: int) buy0,
+    sum(amount0 * (NOT is_buy) :: int) sell0,
+    sum(amount1 * is_buy :: int) buy1,
+    sum(amount1 * (NOT is_buy) :: int) sell1,
+    sum(amountu * is_buy :: int) buyu,
+    sum(amountu * (NOT is_buy) :: int) sellu,
+    sum(is_buy :: int) AS buys,
+    sum((NOT is_buy) :: int) AS sells
   FROM
     t_trade SAMPLE BY 1h ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY WEEK;
@@ -83,13 +126,22 @@ CREATE MATERIALIZED VIEW t_kline_4h AS (
   SELECT
     ts,
     pool_id,
-    first(price) open,
-    max(price) high,
-    min(price) low,
-    last(price) close,
-    sum(amount0) volume0,
-    sum(amount1) volume1,
-    sum(amount) volume
+    first(priceu) openu,
+    max(priceu) highu,
+    min(priceu) lowu,
+    last(priceu) closeu,
+    first(price01) open01,
+    max(price01) high01,
+    min(price01) low01,
+    last(price01) close01,
+    sum(amount0 * is_buy :: int) buy0,
+    sum(amount0 * (NOT is_buy) :: int) sell0,
+    sum(amount1 * is_buy :: int) buy1,
+    sum(amount1 * (NOT is_buy) :: int) sell1,
+    sum(amountu * is_buy :: int) buyu,
+    sum(amountu * (NOT is_buy) :: int) sellu,
+    sum(is_buy :: int) AS buys,
+    sum((NOT is_buy) :: int) AS sells
   FROM
     t_trade SAMPLE BY 4h ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY WEEK;
@@ -99,13 +151,22 @@ CREATE MATERIALIZED VIEW t_kline_12h AS (
   SELECT
     ts,
     pool_id,
-    first(price) open,
-    max(price) high,
-    min(price) low,
-    last(price) close,
-    sum(amount0) volume0,
-    sum(amount1) volume1,
-    sum(amount) volume
+    first(priceu) openu,
+    max(priceu) highu,
+    min(priceu) lowu,
+    last(priceu) closeu,
+    first(price01) open01,
+    max(price01) high01,
+    min(price01) low01,
+    last(price01) close01,
+    sum(amount0 * is_buy :: int) buy0,
+    sum(amount0 * (NOT is_buy) :: int) sell0,
+    sum(amount1 * is_buy :: int) buy1,
+    sum(amount1 * (NOT is_buy) :: int) sell1,
+    sum(amountu * is_buy :: int) buyu,
+    sum(amountu * (NOT is_buy) :: int) sellu,
+    sum(is_buy :: int) AS buys,
+    sum((NOT is_buy) :: int) AS sells
   FROM
     t_trade SAMPLE BY 12h ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY MONTH;
@@ -115,13 +176,22 @@ CREATE MATERIALIZED VIEW t_kline_1d AS (
   SELECT
     ts,
     pool_id,
-    first(price) open,
-    max(price) high,
-    min(price) low,
-    last(price) close,
-    sum(amount0) volume0,
-    sum(amount1) volume1,
-    sum(amount) volume
+    first(priceu) openu,
+    max(priceu) highu,
+    min(priceu) lowu,
+    last(priceu) closeu,
+    first(price01) open01,
+    max(price01) high01,
+    min(price01) low01,
+    last(price01) close01,
+    sum(amount0 * is_buy :: int) buy0,
+    sum(amount0 * (NOT is_buy) :: int) sell0,
+    sum(amount1 * is_buy :: int) buy1,
+    sum(amount1 * (NOT is_buy) :: int) sell1,
+    sum(amountu * is_buy :: int) buyu,
+    sum(amountu * (NOT is_buy) :: int) sellu,
+    sum(is_buy :: int) AS buys,
+    sum((NOT is_buy) :: int) AS sells
   FROM
     t_trade SAMPLE BY 1d ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY MONTH;
@@ -131,13 +201,22 @@ CREATE MATERIALIZED VIEW t_kline_1w AS (
   SELECT
     ts,
     pool_id,
-    first(price) open,
-    max(price) high,
-    min(price) low,
-    last(price) close,
-    sum(amount0) volume0,
-    sum(amount1) volume1,
-    sum(amount) volume
+    first(priceu) openu,
+    max(priceu) highu,
+    min(priceu) lowu,
+    last(priceu) closeu,
+    first(price01) open01,
+    max(price01) high01,
+    min(price01) low01,
+    last(price01) close01,
+    sum(amount0 * is_buy :: int) buy0,
+    sum(amount0 * (NOT is_buy) :: int) sell0,
+    sum(amount1 * is_buy :: int) buy1,
+    sum(amount1 * (NOT is_buy) :: int) sell1,
+    sum(amountu * is_buy :: int) buyu,
+    sum(amountu * (NOT is_buy) :: int) sellu,
+    sum(is_buy :: int) AS buys,
+    sum((NOT is_buy) :: int) AS sells
   FROM
     t_trade SAMPLE BY 1w ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY YEAR;
@@ -147,13 +226,22 @@ CREATE MATERIALIZED VIEW t_kline_1mo AS (
   SELECT
     ts,
     pool_id,
-    first(price) open,
-    max(price) high,
-    min(price) low,
-    last(price) close,
-    sum(amount0) volume0,
-    sum(amount1) volume1,
-    sum(amount) volume
+    first(priceu) openu,
+    max(priceu) highu,
+    min(priceu) lowu,
+    last(priceu) closeu,
+    first(price01) open01,
+    max(price01) high01,
+    min(price01) low01,
+    last(price01) close01,
+    sum(amount0 * is_buy :: int) buy0,
+    sum(amount0 * (NOT is_buy) :: int) sell0,
+    sum(amount1 * is_buy :: int) buy1,
+    sum(amount1 * (NOT is_buy) :: int) sell1,
+    sum(amountu * is_buy :: int) buyu,
+    sum(amountu * (NOT is_buy) :: int) sellu,
+    sum(is_buy :: int) AS buys,
+    sum((NOT is_buy) :: int) AS sells
   FROM
     t_trade SAMPLE BY 1M ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY YEAR;
@@ -163,13 +251,22 @@ CREATE MATERIALIZED VIEW t_kline_1y AS (
   SELECT
     ts,
     pool_id,
-    first(price) open,
-    max(price) high,
-    min(price) low,
-    last(price) close,
-    sum(amount0) volume0,
-    sum(amount1) volume1,
-    sum(amount) volume
+    first(priceu) openu,
+    max(priceu) highu,
+    min(priceu) lowu,
+    last(priceu) closeu,
+    first(price01) open01,
+    max(price01) high01,
+    min(price01) low01,
+    last(price01) close01,
+    sum(amount0 * is_buy :: int) buy0,
+    sum(amount0 * (NOT is_buy) :: int) sell0,
+    sum(amount1 * is_buy :: int) buy1,
+    sum(amount1 * (NOT is_buy) :: int) sell1,
+    sum(amountu * is_buy :: int) buyu,
+    sum(amountu * (NOT is_buy) :: int) sellu,
+    sum(is_buy :: int) AS buys,
+    sum((NOT is_buy) :: int) AS sells
   FROM
     t_trade SAMPLE BY 1y ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY YEAR;
@@ -184,24 +281,42 @@ CREATE TABLE t_trade (
   -- 'long' does not exist in Postgres, use BIGINT
   is_buy BOOLEAN NOT NULL,
   -- Buy (true), Sell (false)
-  price DOUBLE PRECISION NOT NULL,
+  priceu DOUBLE PRECISION NOT NULL,
   price01 DOUBLE PRECISION NOT NULL,
   amount0 DOUBLE PRECISION NOT NULL,
   amount1 DOUBLE PRECISION NOT NULL,
-  amount DOUBLE PRECISION NOT NULL
+  amountu DOUBLE PRECISION NOT NULL
 );
+
+/*
+SELECT 'DROP TABLE ' || string_agg(quote_ident(tablename), ', ') || ' CASCADE;'
+FROM pg_tables
+WHERE tablename LIKE 't_kline_%'
+AND schemaname = 'public';
+ */
 
 CREATE TABLE t_kline_5m (
   ts TIMESTAMP NOT NULL,
   pool_id BIGINT NOT NULL,
-  open DOUBLE PRECISION NOT NULL,
-  high DOUBLE PRECISION NOT NULL,
-  low DOUBLE PRECISION NOT NULL,
-  close DOUBLE PRECISION NOT NULL,
-  volume0 DOUBLE PRECISION NOT NULL,
-  volume1 DOUBLE PRECISION NOT NULL,
-  volume DOUBLE PRECISION NOT NULL
+  openu DOUBLE PRECISION NOT NULL,
+  highu DOUBLE PRECISION NOT NULL,
+  lowu DOUBLE PRECISION NOT NULL,
+  closeu DOUBLE PRECISION NOT NULL,
+  open01 DOUBLE PRECISION NOT NULL,
+  high01 DOUBLE PRECISION NOT NULL,
+  low01 DOUBLE PRECISION NOT NULL,
+  close01 DOUBLE PRECISION NOT NULL,
+  buy0 DOUBLE PRECISION NOT NULL,
+  sell0 DOUBLE PRECISION NOT NULL,
+  buy1 DOUBLE PRECISION NOT NULL,
+  sell1 DOUBLE PRECISION NOT NULL,
+  buyu DOUBLE PRECISION NOT NULL,
+  sellu DOUBLE PRECISION NOT NULL,
+  buys BIGINT NOT NULL,
+  sells BIGINT NOT NULL
 );
+
+
 
 CREATE TABLE t_kline_15m (LIKE t_kline_5m INCLUDING ALL);
 
@@ -220,6 +335,56 @@ CREATE TABLE t_kline_1w (LIKE t_kline_5m INCLUDING ALL);
 CREATE TABLE t_kline_1mo (LIKE t_kline_5m INCLUDING ALL);
 
 CREATE TABLE t_kline_1y (LIKE t_kline_5m INCLUDING ALL);
+
+CREATE TABLE t_pool (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  chain_id BIGINT NOT NULL,
+  address VARCHAR(255) NOT NULL,
+  pool_type_id int NOT NULL,
+  launchpad_type_id int NOT NULL,
+  token0_id BIGINT NOT NULL,
+  token1_id BIGINT NOT NULL,
+  liquidity0 DECIMAL(60, 0) NOT NULL,
+  liquidity1 DECIMAL(60, 0) NOT NULL,
+  fee_bps int NOT NULL,
+  -- Fee rate charged by the pool (1 for 0.01%)
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NOT NULL UNIQUE KEY `idx_address` (`address`)
+);
+
+CREATE TABLE t_pool_type (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  dex_id INT NOT NULL,
+  name VARCHAR(255) NOT NULL DEFAULT '',
+  version VARCHAR(255) NOT NULL DEFAULT '',
+  icon VARCHAR(2000) NOT NULL DEFAULT '',
+  website VARCHAR(2000) NOT NULL DEFAULT '',
+  description TEXT NOT NULL DEFAULT '',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+
+CREATE TABLE t_launchpad_type (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL DEFAULT '',
+  version VARCHAR(255) NOT NULL DEFAULT '',
+  icon VARCHAR(2000) NOT NULL DEFAULT '',
+  website VARCHAR(2000) NOT NULL DEFAULT '',
+  description TEXT NOT NULL DEFAULT '',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+
+CREATE TABLE t_dex (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL DEFAULT '',
+  version VARCHAR(255) NOT NULL DEFAULT '',
+  icon VARCHAR(2000) NOT NULL DEFAULT '',
+  website VARCHAR(2000) NOT NULL DEFAULT '',
+  description TEXT NOT NULL DEFAULT '',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE `t_chain_info` (
   `id` bigint NOT NULL AUTO_INCREMENT,
@@ -258,7 +423,7 @@ CREATE TABLE `t_chain_info` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `network_code` (`network_code`)
-) ENGINE = InnoDB AUTO_INCREMENT = 52 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE `t_node_info` (
   `id` bigint NOT NULL AUTO_INCREMENT,
@@ -270,7 +435,7 @@ CREATE TABLE `t_node_info` (
   `usability` int DEFAULT '100',
   PRIMARY KEY (`id`),
   UNIQUE KEY `chain_id_rpc_url` (`chain_id`, `rpc_url`)
-) ENGINE = InnoDB AUTO_INCREMENT = 265 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE `t_kv` (
   `key` varchar(255) NOT NULL,
@@ -285,7 +450,7 @@ CREATE TABLE `t_tag` (
   `tag_name` varchar(128) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_tag_name` (`tag_name`)
-) ENGINE = InnoDB AUTO_INCREMENT = 52 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE `t_object_tag` (
   `object_table` varchar(64) NOT NULL,
@@ -324,7 +489,7 @@ CREATE TABLE `t_token_info` (
   `pricechg1h` double NOT NULL DEFAULT '0',
   `pricechg5m` double NOT NULL DEFAULT '0',
   `comment` varchar(2048) NOT NULL DEFAULT '',
-  `price` double NOT NULL DEFAULT '0',
+  `priceu` double NOT NULL DEFAULT '0',
   `liquidity` double NOT NULL DEFAULT '0',
   `txbuy24h` int NOT NULL DEFAULT '0',
   `txbuy6h` int NOT NULL DEFAULT '0',
@@ -339,7 +504,7 @@ CREATE TABLE `t_token_info` (
   UNIQUE KEY `idx_chain_name_token_address` (`chain_name`, `token_address`),
   KEY `idx_token_name` (`token_name`),
   KEY `idx_insert_timestamp` (`insert_timestamp`)
-) ENGINE = InnoDB AUTO_INCREMENT = 5820029 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE `t_event_processed_block` (
   `chainid` int NOT NULL,
@@ -447,7 +612,7 @@ CREATE TABLE t_user_address (
 --     `comment` varchar(2048) NOT NULL DEFAULT '',
 --     `mcap` DOUBLE NOT NULL DEFAULT 0,
 --     `fdv` DOUBLE NOT NULL DEFAULT 0,
---     `price` DOUBLE NOT NULL DEFAULT 0,
+--     `priceu` DOUBLE NOT NULL DEFAULT 0,
 --     `liquidity` DOUBLE NOT NULL DEFAULT 0,
 --     `volume24h` DOUBLE NOT NULL DEFAULT 0,
 --     `volume6h` DOUBLE NOT NULL DEFAULT 0,
