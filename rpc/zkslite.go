@@ -6,10 +6,10 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/dexerlab/utils-go/loader"
 	"github.com/dexerlab/utils-go/network"
 	"github.com/dexerlab/utils-go/util"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 type ZksliteRpc struct {
@@ -38,7 +38,7 @@ func (w *ZksliteRpc) GetChecksumAddress(addr string) string {
 	return common.HexToAddress(addr).Hex()
 }
 
-func (w *ZksliteRpc) GetTokenInfo(ctx context.Context, tokenAddr string) (*loader.TokenInfo, error) {
+func (w *ZksliteRpc) GetTokenInfo(ctx context.Context, tokenAddr string, cache bool) (*loader.TokenInfo, error) {
 	return nil, fmt.Errorf("no impl")
 }
 

@@ -9,10 +9,10 @@ import (
 
 	"github.com/NethermindEth/starknet.go/rpc"
 	"github.com/block-vision/sui-go-sdk/sui"
-	"github.com/ethereum/go-ethereum/ethclient"
-	solrpc "github.com/gagliardetto/solana-go/rpc"
 	"github.com/dexerlab/utils-go/alert"
 	"github.com/dexerlab/utils-go/convert"
+	"github.com/ethereum/go-ethereum/ethclient"
+	solrpc "github.com/gagliardetto/solana-go/rpc"
 	"github.com/sentioxyz/fuel-go"
 	"github.com/xssnick/tonutils-go/liteclient"
 	"github.com/xssnick/tonutils-go/ton"
@@ -111,7 +111,7 @@ func NewChainInfoManager(db *sql.DB, alerter alert.Alerter) *ChainInfoManager {
 	}
 }
 
-func (mgr *ChainInfoManager) GetChainInfoAutoIds() []int64 {
+func (mgr *ChainInfoManager) GetChainInfoIds() []int64 {
 	mgr.mutex.RLock()
 	ids := make([]int64, 0, len(mgr.idChains))
 

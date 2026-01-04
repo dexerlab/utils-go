@@ -168,7 +168,7 @@ func (mgr *TokenInfoManager) LoadAllToken(chainManager *ChainInfoManager) {
 		return
 	}
 
-	allIDs := chainManager.GetChainInfoAutoIds()
+	allIDs := chainManager.GetChainInfoIds()
 	for _, id := range allIDs {
 		chainInfo, ok := chainManager.GetChainInfoById(id)
 		if !ok {

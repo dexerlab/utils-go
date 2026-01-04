@@ -4,16 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/btcsuite/btcd/chaincfg"
 	"math/big"
 	"strings"
 
+	"github.com/btcsuite/btcd/chaincfg"
+
 	"github.com/btcsuite/btcd/btcutil"
-	_ "github.com/gagliardetto/solana-go"
-	"github.com/ninja0404/go-unisat"
 	"github.com/dexerlab/utils-go/apollosdk"
 	"github.com/dexerlab/utils-go/loader"
 	"github.com/dexerlab/utils-go/util"
+	_ "github.com/gagliardetto/solana-go"
+	"github.com/ninja0404/go-unisat"
 )
 
 type BitcoinRpc struct {
@@ -65,7 +66,7 @@ func (w *BitcoinRpc) GetChecksumAddress(addr string) string {
 	return a.String()
 }
 
-func (w *BitcoinRpc) GetTokenInfo(ctx context.Context, tokenAddr string) (*loader.TokenInfo, error) {
+func (w *BitcoinRpc) GetTokenInfo(ctx context.Context, tokenAddr string, cache bool) (*loader.TokenInfo, error) {
 	return nil, fmt.Errorf("no impl")
 }
 

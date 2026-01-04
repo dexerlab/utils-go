@@ -9,15 +9,15 @@ import (
 
 	"github.com/blocto/solana-go-sdk/common"
 	"github.com/blocto/solana-go-sdk/program/metaplex/token_metadata"
+	"github.com/dexerlab/utils-go/loader"
+	"github.com/dexerlab/utils-go/log"
+	sol "github.com/dexerlab/utils-go/txn/solana"
+	"github.com/dexerlab/utils-go/util"
 	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/gagliardetto/solana-go/rpc"
 	"github.com/near/borsh-go"
-	"github.com/dexerlab/utils-go/loader"
-	"github.com/dexerlab/utils-go/log"
-	sol "github.com/dexerlab/utils-go/txn/solana"
-	"github.com/dexerlab/utils-go/util"
 	"github.com/shopspring/decimal"
 )
 
@@ -96,7 +96,7 @@ func getExtensionData(extensionType uint16, tlvData []byte) []byte {
 	return nil
 }
 
-func (w *SolanaRpc) GetTokenInfo(ctx context.Context, tokenAddr string) (*loader.TokenInfo, error) {
+func (w *SolanaRpc) GetTokenInfo(ctx context.Context, tokenAddr string, cache bool) (*loader.TokenInfo, error) {
 	if util.IsHexStringZero(tokenAddr) || tokenAddr == "11111111111111111111111111111111" {
 		return &loader.TokenInfo{
 			TokenName:    "SOL",
@@ -179,7 +179,9 @@ func (w *SolanaRpc) GetTokenInfo(ctx context.Context, tokenAddr string) (*loader
 		TotalSupply:  decimal.NewFromUint64(mintAccount.Supply),
 		Flags:        int32(flag),
 	}
-	w.tokenInfoMgr.AddTokenInfo(token)
+	if cache {
+		w.tokenInfoMgr.AddTokenInfo(token)
+	}
 	return token, nil
 }
 

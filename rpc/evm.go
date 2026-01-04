@@ -6,6 +6,12 @@ import (
 	"math/big"
 	"strings"
 
+	"github.com/dexerlab/utils-go/abi/erc20"
+	"github.com/dexerlab/utils-go/loader"
+	"github.com/dexerlab/utils-go/log"
+	"github.com/dexerlab/utils-go/owlconsts"
+	"github.com/dexerlab/utils-go/pointer"
+	"github.com/dexerlab/utils-go/util"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -14,12 +20,6 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/dexerlab/utils-go/abi/erc20"
-	"github.com/dexerlab/utils-go/loader"
-	"github.com/dexerlab/utils-go/log"
-	"github.com/dexerlab/utils-go/owlconsts"
-	"github.com/dexerlab/utils-go/pointer"
-	"github.com/dexerlab/utils-go/util"
 	"github.com/shopspring/decimal"
 	"golang.org/x/crypto/sha3"
 )
@@ -59,7 +59,7 @@ func (w *EvmRpc) Backend() int32 {
 	return 1
 }
 
-func (w *EvmRpc) GetTokenInfo(ctx context.Context, tokenAddr string) (*loader.TokenInfo, error) {
+func (w *EvmRpc) GetTokenInfo(ctx context.Context, tokenAddr string, cache bool) (*loader.TokenInfo, error) {
 	if util.IsHexStringZero(tokenAddr) {
 		return &loader.TokenInfo{
 			TokenName:    w.chainInfo.GasTokenName,
@@ -181,7 +181,9 @@ func (w *EvmRpc) GetTokenInfo(ctx context.Context, tokenAddr string) (*loader.To
 		FullName:     strings.TrimSpace(string(name)),
 		TotalSupply:  decimal.NewFromBigInt(totalSupply, 0),
 	}
-	w.tokenInfoMgr.AddTokenInfo(ti)
+	if cache {
+		w.tokenInfoMgr.AddTokenInfo(ti)
+	}
 	return ti, nil
 }
 

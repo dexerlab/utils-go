@@ -137,21 +137,21 @@ func GetTokenDetails(ctx context.Context, serverUrl, chainName string, addresses
 	return resp.Infos, nil
 }
 
-func GetTokenInfoBy(mgr *loader.ChainInfoManager, chainName string, token string) (*loader.TokenInfo, error) {
+func GetTokenInfoBy(mgr *loader.ChainInfoManager, chainName string, token string, cache bool) (*loader.TokenInfo, error) {
 	chainInfo, ok := mgr.GetChainInfoByName(chainName)
 	if !ok {
 		return nil, fmt.Errorf("no chain info for %s", chainName)
 	}
-	return GetTokenInfo(chainInfo, token)
+	return GetTokenInfo(chainInfo, token, cache)
 }
 
-func GetTokenInfo(chainInfo *loader.ChainInfo, token string) (*loader.TokenInfo, error) {
+func GetTokenInfo(chainInfo *loader.ChainInfo, token string, cache bool) (*loader.TokenInfo, error) {
 	r, err := rpc.GetRpc(chainInfo, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	ti, err := r.GetTokenInfo(context.TODO(), token)
+	ti, err := r.GetTokenInfo(context.TODO(), token, cache)
 	if err != nil {
 		return nil, err
 	}

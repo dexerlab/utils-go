@@ -17,7 +17,7 @@ type Rpc interface {
 	GetAllowance(ctx context.Context, ownerAddr string, tokenAddr string, spenderAddr string) (*big.Int, error)
 	GetBalance(ctx context.Context, ownerAddr string, tokenAddr string) (*big.Int, error)
 	GetBalanceAtBlockNumber(ctx context.Context, ownerAddr string, tokenAddr string, blockNumber int64) (*big.Int, error)
-	GetTokenInfo(ctx context.Context, tokenAddr string) (*loader.TokenInfo, error)
+	GetTokenInfo(ctx context.Context, tokenAddr string, cache bool) (*loader.TokenInfo, error)
 	IsAddressValid(addr string) bool
 	GetChecksumAddress(addr string) string
 }

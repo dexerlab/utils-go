@@ -6,10 +6,10 @@ import (
 	"math/big"
 	"strings"
 
-	_ "github.com/gagliardetto/solana-go"
 	"github.com/dexerlab/utils-go/loader"
 	"github.com/dexerlab/utils-go/network"
 	"github.com/dexerlab/utils-go/util"
+	_ "github.com/gagliardetto/solana-go"
 )
 
 type BenfenRpc struct {
@@ -34,7 +34,7 @@ func (w *BenfenRpc) GetBalanceAtBlockNumber(ctx context.Context, ownerAddr strin
 	return w.GetBalance(ctx, ownerAddr, tokenAddr)
 }
 
-func (w *BenfenRpc) GetTokenInfo(ctx context.Context, tokenAddr string) (*loader.TokenInfo, error) {
+func (w *BenfenRpc) GetTokenInfo(ctx context.Context, tokenAddr string, cache bool) (*loader.TokenInfo, error) {
 	return nil, fmt.Errorf("no impl")
 }
 

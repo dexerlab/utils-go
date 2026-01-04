@@ -9,10 +9,10 @@ import (
 	"github.com/NethermindEth/juno/core/felt"
 	"github.com/NethermindEth/starknet.go/rpc"
 	"github.com/NethermindEth/starknet.go/utils"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/dexerlab/utils-go/loader"
 	"github.com/dexerlab/utils-go/log"
 	"github.com/dexerlab/utils-go/util"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 type StarknetRpc struct {
@@ -42,7 +42,7 @@ func (w *StarknetRpc) GetChecksumAddress(addr string) string {
 	return caddr
 }
 
-func (w *StarknetRpc) GetTokenInfo(ctx context.Context, tokenAddr string) (*loader.TokenInfo, error) {
+func (w *StarknetRpc) GetTokenInfo(ctx context.Context, tokenAddr string, cache bool) (*loader.TokenInfo, error) {
 	return nil, fmt.Errorf("no impl")
 }
 

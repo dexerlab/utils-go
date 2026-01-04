@@ -6,10 +6,10 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/machinebox/graphql"
 	"github.com/dexerlab/utils-go/loader"
 	"github.com/dexerlab/utils-go/util"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/machinebox/graphql"
 	"github.com/sentioxyz/fuel-go"
 	"github.com/sentioxyz/fuel-go/types"
 )
@@ -127,6 +127,6 @@ func (f *FuelRpc) GetBalanceAtBlockNumber(ctx context.Context, ownerAddr string,
 	return f.GetBalance(ctx, ownerAddr, tokenAddr)
 }
 
-func (f *FuelRpc) GetTokenInfo(ctx context.Context, tokenAddr string) (*loader.TokenInfo, error) {
+func (f *FuelRpc) GetTokenInfo(ctx context.Context, tokenAddr string, cache bool) (*loader.TokenInfo, error) {
 	return nil, fmt.Errorf("not implement")
 }

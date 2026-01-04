@@ -9,9 +9,9 @@ import (
 
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/block-vision/sui-go-sdk/sui"
-	_ "github.com/gagliardetto/solana-go"
 	"github.com/dexerlab/utils-go/loader"
 	"github.com/dexerlab/utils-go/util"
+	_ "github.com/gagliardetto/solana-go"
 	"github.com/shopspring/decimal"
 )
 
@@ -45,7 +45,7 @@ func (w *SuiRpc) GetBalanceAtBlockNumber(ctx context.Context, ownerAddr string, 
 	return w.GetBalance(ctx, ownerAddr, tokenAddr)
 }
 
-func (w *SuiRpc) GetTokenInfo(ctx context.Context, tokenAddr string) (*loader.TokenInfo, error) {
+func (w *SuiRpc) GetTokenInfo(ctx context.Context, tokenAddr string, cache bool) (*loader.TokenInfo, error) {
 	tokenAddr = strings.TrimSpace(tokenAddr)
 	if legToken, ok := w.legTokens[tokenAddr]; ok {
 		data := legToken.(map[string]interface{})
@@ -84,8 +84,9 @@ func (w *SuiRpc) GetTokenInfo(ctx context.Context, tokenAddr string) (*loader.To
 		FullName:     strings.TrimSpace(rsp.Name),
 		Icon:         rsp.IconUrl,
 	}
-	w.tokenInfoMgr.AddTokenInfo(ti)
-
+	if cache {
+		w.tokenInfoMgr.AddTokenInfo(ti)
+	}
 	trsp, err := w.client.SuiXGetTotalSupply(ctx, models.SuiXGetTotalSupplyRequest{
 		CoinType: tokenAddr,
 	})

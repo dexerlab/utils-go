@@ -107,7 +107,7 @@ func (t *TonRpc) GetBalanceAtBlockNumber(ctx context.Context, ownerAddr string, 
 	return t.GetBalance(ctx, ownerAddr, tokenAddr)
 }
 
-func (t *TonRpc) GetTokenInfo(ctx context.Context, tokenAddr string) (*loader.TokenInfo, error) {
+func (t *TonRpc) GetTokenInfo(ctx context.Context, tokenAddr string, cache bool) (*loader.TokenInfo, error) {
 	return nil, fmt.Errorf("not implement")
 }
 

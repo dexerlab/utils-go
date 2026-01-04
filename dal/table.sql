@@ -15,12 +15,11 @@ CREATE TABLE t_trade (
 ) timestamp(ts) PARTITION BY HOUR TTL 10 DAY WAL DEDUP UPSERT KEYS(ts, pool_id);
 
 /*
-SELECT 'DROP MATERIALIZED VIEW ' || table_name || ';' 
-FROM tables() 
-WHERE table_name LIKE 't_kline_%';
+ SELECT 'DROP MATERIALIZED VIEW ' || table_name || ';' 
+ FROM tables() 
+ WHERE table_name LIKE 't_kline_%';
  concat('DROP TABLE ', table_name, ';') 
  */
-
 -- 5 Minute
 CREATE MATERIALIZED VIEW t_kline_5m AS (
   SELECT
@@ -289,12 +288,11 @@ CREATE TABLE t_trade (
 );
 
 /*
-SELECT 'DROP TABLE ' || string_agg(quote_ident(tablename), ', ') || ' CASCADE;'
-FROM pg_tables
-WHERE tablename LIKE 't_kline_%'
-AND schemaname = 'public';
+ SELECT 'DROP TABLE ' || string_agg(quote_ident(tablename), ', ') || ' CASCADE;'
+ FROM pg_tables
+ WHERE tablename LIKE 't_kline_%'
+ AND schemaname = 'public';
  */
-
 CREATE TABLE t_kline_5m (
   ts TIMESTAMP NOT NULL,
   pool_id BIGINT NOT NULL,
@@ -316,8 +314,6 @@ CREATE TABLE t_kline_5m (
   sells BIGINT NOT NULL
 );
 
-
-
 CREATE TABLE t_kline_15m (LIKE t_kline_5m INCLUDING ALL);
 
 CREATE TABLE t_kline_30m (LIKE t_kline_5m INCLUDING ALL);
@@ -338,8 +334,8 @@ CREATE TABLE t_kline_1y (LIKE t_kline_5m INCLUDING ALL);
 
 CREATE TABLE t_pool (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  pool_address VARCHAR(255) NOT NULL,
   chain_id BIGINT NOT NULL,
-  address VARCHAR(255) NOT NULL,
   pool_type_id int NOT NULL,
   launchpad_type_id int NOT NULL,
   token0_id BIGINT NOT NULL,
@@ -349,14 +345,38 @@ CREATE TABLE t_pool (
   fee_bps int NOT NULL,
   -- Fee rate charged by the pool (1 for 0.01%)
   created_at TIMESTAMP NOT NULL,
-  updated_at TIMESTAMP NOT NULL UNIQUE KEY `idx_address` (`address`)
-);
+  updated_at TIMESTAMP NOT NULL,
+  UNIQUE KEY `idx_pool_address_chain_id` (`pool_address`, `chain_id`),
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+
+CREATE TABLE `t_token` (
+  `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `update_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `insert_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `token_name` varchar(128) NOT NULL,
+  `chain_id` BIGINT NOT NULL,
+  `token_address` varchar(255) NOT NULL,
+  `decimals` int NOT NULL,
+  `full_name` varchar(128) NOT NULL DEFAULT '',
+  `total_supply` decimal(60, 0) NOT NULL DEFAULT '0',
+  `discover_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `icon` varchar(1024) NOT NULL DEFAULT '',
+  `twitter` varchar(1024) NOT NULL DEFAULT '',
+  `telegram` varchar(1024) NOT NULL DEFAULT '',
+  `website` varchar(1024) NOT NULL DEFAULT '',
+  `discord` varchar(1024) NOT NULL DEFAULT '',
+  `mcap` double NOT NULL DEFAULT '0',
+  `liquidity` double NOT NULL DEFAULT '0',
+  `comment` varchar(2048) NOT NULL DEFAULT '',
+  `flags` int NOT NULL DEFAULT '0',
+  UNIQUE KEY `idx_token_address_chain_id` (`token_address`, `chain_id`),
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE t_pool_type (
   id INT AUTO_INCREMENT PRIMARY KEY,
   dex_id INT NOT NULL,
-  name VARCHAR(255) NOT NULL DEFAULT '',
-  version VARCHAR(255) NOT NULL DEFAULT '',
+  name VARCHAR(64) NOT NULL DEFAULT '',
+  version VARCHAR(64) NOT NULL DEFAULT '',
   icon VARCHAR(2000) NOT NULL DEFAULT '',
   website VARCHAR(2000) NOT NULL DEFAULT '',
   description TEXT NOT NULL DEFAULT '',
@@ -366,8 +386,8 @@ CREATE TABLE t_pool_type (
 
 CREATE TABLE t_launchpad_type (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(255) NOT NULL DEFAULT '',
-  version VARCHAR(255) NOT NULL DEFAULT '',
+  name VARCHAR(64) NOT NULL DEFAULT '',
+  version VARCHAR(64) NOT NULL DEFAULT '',
   icon VARCHAR(2000) NOT NULL DEFAULT '',
   website VARCHAR(2000) NOT NULL DEFAULT '',
   description TEXT NOT NULL DEFAULT '',
@@ -377,8 +397,8 @@ CREATE TABLE t_launchpad_type (
 
 CREATE TABLE t_dex (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(255) NOT NULL DEFAULT '',
-  version VARCHAR(255) NOT NULL DEFAULT '',
+  name VARCHAR(64) NOT NULL DEFAULT '',
+  version VARCHAR(64) NOT NULL DEFAULT '',
   icon VARCHAR(2000) NOT NULL DEFAULT '',
   website VARCHAR(2000) NOT NULL DEFAULT '',
   description TEXT NOT NULL DEFAULT '',
@@ -462,49 +482,49 @@ CREATE TABLE `t_object_tag` (
   KEY `idx_object` (`object_table`, `object_id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
-CREATE TABLE `t_token_info` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `update_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `insert_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `token_name` varchar(128) NOT NULL,
-  `chain_name` varchar(64) NOT NULL,
-  `token_address` varchar(128) NOT NULL,
-  `decimals` int NOT NULL,
-  `full_name` varchar(128) NOT NULL DEFAULT '',
-  `total_supply` decimal(64, 0) NOT NULL DEFAULT '0',
-  `discover_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `icon` varchar(1024) NOT NULL DEFAULT '',
-  `twitter` varchar(1024) NOT NULL DEFAULT '',
-  `telegram` varchar(1024) NOT NULL DEFAULT '',
-  `website` varchar(1024) NOT NULL DEFAULT '',
-  `discord` varchar(1024) NOT NULL DEFAULT '',
-  `mcap` double NOT NULL DEFAULT '0',
-  `fdv` double NOT NULL DEFAULT '0',
-  `volume24h` double NOT NULL DEFAULT '0',
-  `volume6h` double NOT NULL DEFAULT '0',
-  `volume1h` double NOT NULL DEFAULT '0',
-  `volume5m` double NOT NULL DEFAULT '0',
-  `pricechg24h` double NOT NULL DEFAULT '0',
-  `pricechg6h` double NOT NULL DEFAULT '0',
-  `pricechg1h` double NOT NULL DEFAULT '0',
-  `pricechg5m` double NOT NULL DEFAULT '0',
-  `comment` varchar(2048) NOT NULL DEFAULT '',
-  `priceu` double NOT NULL DEFAULT '0',
-  `liquidity` double NOT NULL DEFAULT '0',
-  `txbuy24h` int NOT NULL DEFAULT '0',
-  `txbuy6h` int NOT NULL DEFAULT '0',
-  `txbuy1h` int NOT NULL DEFAULT '0',
-  `txbuy5m` int NOT NULL DEFAULT '0',
-  `txsell24h` int NOT NULL DEFAULT '0',
-  `txsell6h` int NOT NULL DEFAULT '0',
-  `txsell1h` int NOT NULL DEFAULT '0',
-  `txsell5m` int NOT NULL DEFAULT '0',
-  `flags` int NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_chain_name_token_address` (`chain_name`, `token_address`),
-  KEY `idx_token_name` (`token_name`),
-  KEY `idx_insert_timestamp` (`insert_timestamp`)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+-- CREATE TABLE `t_token_info` (
+--   `id` bigint NOT NULL AUTO_INCREMENT,
+--   `update_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+--   `insert_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--   `token_name` varchar(128) NOT NULL,
+--   `chain_name` varchar(64) NOT NULL,
+--   `token_address` varchar(128) NOT NULL,
+--   `decimals` int NOT NULL,
+--   `full_name` varchar(128) NOT NULL DEFAULT '',
+--   `total_supply` decimal(64, 0) NOT NULL DEFAULT '0',
+--   `discover_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--   `icon` varchar(1024) NOT NULL DEFAULT '',
+--   `twitter` varchar(1024) NOT NULL DEFAULT '',
+--   `telegram` varchar(1024) NOT NULL DEFAULT '',
+--   `website` varchar(1024) NOT NULL DEFAULT '',
+--   `discord` varchar(1024) NOT NULL DEFAULT '',
+--   `mcap` double NOT NULL DEFAULT '0',
+--   `fdv` double NOT NULL DEFAULT '0',
+--   `volume24h` double NOT NULL DEFAULT '0',
+--   `volume6h` double NOT NULL DEFAULT '0',
+--   `volume1h` double NOT NULL DEFAULT '0',
+--   `volume5m` double NOT NULL DEFAULT '0',
+--   `pricechg24h` double NOT NULL DEFAULT '0',
+--   `pricechg6h` double NOT NULL DEFAULT '0',
+--   `pricechg1h` double NOT NULL DEFAULT '0',
+--   `pricechg5m` double NOT NULL DEFAULT '0',
+--   `comment` varchar(2048) NOT NULL DEFAULT '',
+--   `priceu` double NOT NULL DEFAULT '0',
+--   `liquidity` double NOT NULL DEFAULT '0',
+--   `txbuy24h` int NOT NULL DEFAULT '0',
+--   `txbuy6h` int NOT NULL DEFAULT '0',
+--   `txbuy1h` int NOT NULL DEFAULT '0',
+--   `txbuy5m` int NOT NULL DEFAULT '0',
+--   `txsell24h` int NOT NULL DEFAULT '0',
+--   `txsell6h` int NOT NULL DEFAULT '0',
+--   `txsell1h` int NOT NULL DEFAULT '0',
+--   `txsell5m` int NOT NULL DEFAULT '0',
+--   `flags` int NOT NULL DEFAULT '0',
+--   PRIMARY KEY (`id`),
+--   UNIQUE KEY `idx_chain_name_token_address` (`chain_name`, `token_address`),
+--   KEY `idx_token_name` (`token_name`),
+--   KEY `idx_insert_timestamp` (`insert_timestamp`)
+-- ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE `t_event_processed_block` (
   `chainid` int NOT NULL,
