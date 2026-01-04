@@ -9,10 +9,28 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+func NormalizeString(s string) string {
+	s = strings.TrimSpace(s)
+	s = strings.ToLower(s)
+	return s
+}
+
+func NormalizeAddress(s string) string {
+	s = strings.TrimSpace(s)
+	if Has0xPrefix(s) {
+		s = strings.ToLower(s)
+	}
+	return s
+}
+
+func Has0xPrefix(s string) bool {
+	return len(s) >= 2 && (s[:2] == "0x" || s[:2] == "0X")
+}
+
 func IsHexStringZero(hexString string) bool {
 	// Remove "0x" prefix if it exists
 	hexString = strings.TrimSpace(hexString)
-	if len(hexString) >= 2 && (hexString[:2] == "0x" || hexString[:2] == "0X") {
+	if Has0xPrefix(hexString) {
 		hexString = hexString[2:]
 	}
 
