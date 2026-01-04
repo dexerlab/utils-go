@@ -19,14 +19,14 @@ var (
 	Q                    = new(Query)
 	TChainInfo           *tChainInfo
 	TDex                 *tDex
+	TDexPool             *tDexPool
 	TEventProcessedBlock *tEventProcessedBlock
 	TGappedBlock         *tGappedBlock
 	TKv                  *tKv
-	TLaunchpadType       *tLaunchpadType
+	TLaunchpad           *tLaunchpad
 	TNodeInfo            *tNodeInfo
 	TObjectTag           *tObjectTag
 	TPool                *tPool
-	TPoolType            *tPoolType
 	TTag                 *tTag
 	TToken               *tToken
 	TTokenInfo           *tTokenInfo
@@ -39,14 +39,14 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
 	TChainInfo = &Q.TChainInfo
 	TDex = &Q.TDex
+	TDexPool = &Q.TDexPool
 	TEventProcessedBlock = &Q.TEventProcessedBlock
 	TGappedBlock = &Q.TGappedBlock
 	TKv = &Q.TKv
-	TLaunchpadType = &Q.TLaunchpadType
+	TLaunchpad = &Q.TLaunchpad
 	TNodeInfo = &Q.TNodeInfo
 	TObjectTag = &Q.TObjectTag
 	TPool = &Q.TPool
-	TPoolType = &Q.TPoolType
 	TTag = &Q.TTag
 	TToken = &Q.TToken
 	TTokenInfo = &Q.TTokenInfo
@@ -60,14 +60,14 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		db:                   db,
 		TChainInfo:           newTChainInfo(db, opts...),
 		TDex:                 newTDex(db, opts...),
+		TDexPool:             newTDexPool(db, opts...),
 		TEventProcessedBlock: newTEventProcessedBlock(db, opts...),
 		TGappedBlock:         newTGappedBlock(db, opts...),
 		TKv:                  newTKv(db, opts...),
-		TLaunchpadType:       newTLaunchpadType(db, opts...),
+		TLaunchpad:           newTLaunchpad(db, opts...),
 		TNodeInfo:            newTNodeInfo(db, opts...),
 		TObjectTag:           newTObjectTag(db, opts...),
 		TPool:                newTPool(db, opts...),
-		TPoolType:            newTPoolType(db, opts...),
 		TTag:                 newTTag(db, opts...),
 		TToken:               newTToken(db, opts...),
 		TTokenInfo:           newTTokenInfo(db, opts...),
@@ -82,14 +82,14 @@ type Query struct {
 
 	TChainInfo           tChainInfo
 	TDex                 tDex
+	TDexPool             tDexPool
 	TEventProcessedBlock tEventProcessedBlock
 	TGappedBlock         tGappedBlock
 	TKv                  tKv
-	TLaunchpadType       tLaunchpadType
+	TLaunchpad           tLaunchpad
 	TNodeInfo            tNodeInfo
 	TObjectTag           tObjectTag
 	TPool                tPool
-	TPoolType            tPoolType
 	TTag                 tTag
 	TToken               tToken
 	TTokenInfo           tTokenInfo
@@ -105,14 +105,14 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		db:                   db,
 		TChainInfo:           q.TChainInfo.clone(db),
 		TDex:                 q.TDex.clone(db),
+		TDexPool:             q.TDexPool.clone(db),
 		TEventProcessedBlock: q.TEventProcessedBlock.clone(db),
 		TGappedBlock:         q.TGappedBlock.clone(db),
 		TKv:                  q.TKv.clone(db),
-		TLaunchpadType:       q.TLaunchpadType.clone(db),
+		TLaunchpad:           q.TLaunchpad.clone(db),
 		TNodeInfo:            q.TNodeInfo.clone(db),
 		TObjectTag:           q.TObjectTag.clone(db),
 		TPool:                q.TPool.clone(db),
-		TPoolType:            q.TPoolType.clone(db),
 		TTag:                 q.TTag.clone(db),
 		TToken:               q.TToken.clone(db),
 		TTokenInfo:           q.TTokenInfo.clone(db),
@@ -135,14 +135,14 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		db:                   db,
 		TChainInfo:           q.TChainInfo.replaceDB(db),
 		TDex:                 q.TDex.replaceDB(db),
+		TDexPool:             q.TDexPool.replaceDB(db),
 		TEventProcessedBlock: q.TEventProcessedBlock.replaceDB(db),
 		TGappedBlock:         q.TGappedBlock.replaceDB(db),
 		TKv:                  q.TKv.replaceDB(db),
-		TLaunchpadType:       q.TLaunchpadType.replaceDB(db),
+		TLaunchpad:           q.TLaunchpad.replaceDB(db),
 		TNodeInfo:            q.TNodeInfo.replaceDB(db),
 		TObjectTag:           q.TObjectTag.replaceDB(db),
 		TPool:                q.TPool.replaceDB(db),
-		TPoolType:            q.TPoolType.replaceDB(db),
 		TTag:                 q.TTag.replaceDB(db),
 		TToken:               q.TToken.replaceDB(db),
 		TTokenInfo:           q.TTokenInfo.replaceDB(db),
@@ -155,14 +155,14 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 type queryCtx struct {
 	TChainInfo           ITChainInfoDo
 	TDex                 ITDexDo
+	TDexPool             ITDexPoolDo
 	TEventProcessedBlock ITEventProcessedBlockDo
 	TGappedBlock         ITGappedBlockDo
 	TKv                  ITKvDo
-	TLaunchpadType       ITLaunchpadTypeDo
+	TLaunchpad           ITLaunchpadDo
 	TNodeInfo            ITNodeInfoDo
 	TObjectTag           ITObjectTagDo
 	TPool                ITPoolDo
-	TPoolType            ITPoolTypeDo
 	TTag                 ITTagDo
 	TToken               ITTokenDo
 	TTokenInfo           ITTokenInfoDo
@@ -175,14 +175,14 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
 		TChainInfo:           q.TChainInfo.WithContext(ctx),
 		TDex:                 q.TDex.WithContext(ctx),
+		TDexPool:             q.TDexPool.WithContext(ctx),
 		TEventProcessedBlock: q.TEventProcessedBlock.WithContext(ctx),
 		TGappedBlock:         q.TGappedBlock.WithContext(ctx),
 		TKv:                  q.TKv.WithContext(ctx),
-		TLaunchpadType:       q.TLaunchpadType.WithContext(ctx),
+		TLaunchpad:           q.TLaunchpad.WithContext(ctx),
 		TNodeInfo:            q.TNodeInfo.WithContext(ctx),
 		TObjectTag:           q.TObjectTag.WithContext(ctx),
 		TPool:                q.TPool.WithContext(ctx),
-		TPoolType:            q.TPoolType.WithContext(ctx),
 		TTag:                 q.TTag.WithContext(ctx),
 		TToken:               q.TToken.WithContext(ctx),
 		TTokenInfo:           q.TTokenInfo.WithContext(ctx),

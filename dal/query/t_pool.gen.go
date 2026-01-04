@@ -30,8 +30,8 @@ func newTPool(db *gorm.DB, opts ...gen.DOOption) tPool {
 	_tPool.ID = field.NewInt64(tableName, "id")
 	_tPool.Address = field.NewString(tableName, "address")
 	_tPool.ChainID = field.NewInt64(tableName, "chain_id")
-	_tPool.PoolTypeID = field.NewInt32(tableName, "pool_type_id")
-	_tPool.LaunchpadTypeID = field.NewInt32(tableName, "launchpad_type_id")
+	_tPool.DexPoolID = field.NewInt32(tableName, "dex_pool_id")
+	_tPool.LaunchpadID = field.NewInt32(tableName, "launchpad_id")
 	_tPool.Token0ID = field.NewInt64(tableName, "token0_id")
 	_tPool.Token1ID = field.NewInt64(tableName, "token1_id")
 	_tPool.FeeBps = field.NewInt32(tableName, "fee_bps")
@@ -46,17 +46,17 @@ func newTPool(db *gorm.DB, opts ...gen.DOOption) tPool {
 type tPool struct {
 	tPoolDo tPoolDo
 
-	ALL             field.Asterisk
-	ID              field.Int64
-	Address         field.String
-	ChainID         field.Int64
-	PoolTypeID      field.Int32
-	LaunchpadTypeID field.Int32
-	Token0ID        field.Int64
-	Token1ID        field.Int64
-	FeeBps          field.Int32
-	CreatedAt       field.Time
-	UpdatedAt       field.Time
+	ALL         field.Asterisk
+	ID          field.Int64
+	Address     field.String
+	ChainID     field.Int64
+	DexPoolID   field.Int32
+	LaunchpadID field.Int32
+	Token0ID    field.Int64
+	Token1ID    field.Int64
+	FeeBps      field.Int32
+	CreatedAt   field.Time
+	UpdatedAt   field.Time
 
 	fieldMap map[string]field.Expr
 }
@@ -76,8 +76,8 @@ func (t *tPool) updateTableName(table string) *tPool {
 	t.ID = field.NewInt64(table, "id")
 	t.Address = field.NewString(table, "address")
 	t.ChainID = field.NewInt64(table, "chain_id")
-	t.PoolTypeID = field.NewInt32(table, "pool_type_id")
-	t.LaunchpadTypeID = field.NewInt32(table, "launchpad_type_id")
+	t.DexPoolID = field.NewInt32(table, "dex_pool_id")
+	t.LaunchpadID = field.NewInt32(table, "launchpad_id")
 	t.Token0ID = field.NewInt64(table, "token0_id")
 	t.Token1ID = field.NewInt64(table, "token1_id")
 	t.FeeBps = field.NewInt32(table, "fee_bps")
@@ -111,8 +111,8 @@ func (t *tPool) fillFieldMap() {
 	t.fieldMap["id"] = t.ID
 	t.fieldMap["address"] = t.Address
 	t.fieldMap["chain_id"] = t.ChainID
-	t.fieldMap["pool_type_id"] = t.PoolTypeID
-	t.fieldMap["launchpad_type_id"] = t.LaunchpadTypeID
+	t.fieldMap["dex_pool_id"] = t.DexPoolID
+	t.fieldMap["launchpad_id"] = t.LaunchpadID
 	t.fieldMap["token0_id"] = t.Token0ID
 	t.fieldMap["token1_id"] = t.Token1ID
 	t.fieldMap["fee_bps"] = t.FeeBps

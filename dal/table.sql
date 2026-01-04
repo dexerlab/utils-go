@@ -336,8 +336,8 @@ CREATE TABLE t_pool (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   address VARCHAR(255) NOT NULL,
   chain_id BIGINT NOT NULL,
-  pool_type_id INT NOT NULL,
-  launchpad_type_id INT NOT NULL,
+  dex_pool_id INT NOT NULL,
+  launchpad_id INT NOT NULL,
   token0_id BIGINT NOT NULL,
   token1_id BIGINT NOT NULL,
   -- liquidity0 DECIMAL(60, 0) NOT NULL,
@@ -371,7 +371,7 @@ CREATE TABLE `t_token` (
   UNIQUE KEY `idx_address_chain_id` (`address`, `chain_id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
-CREATE TABLE t_pool_type (
+CREATE TABLE t_dex_pool (
   id INT AUTO_INCREMENT PRIMARY KEY,
   dex_id INT NOT NULL,
   name VARCHAR(64) NOT NULL,
@@ -382,7 +382,7 @@ CREATE TABLE t_pool_type (
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
-CREATE TABLE t_launchpad_type (
+CREATE TABLE t_launchpad (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(64) NOT NULL,
   version VARCHAR(64) NOT NULL DEFAULT '',
