@@ -334,76 +334,72 @@ CREATE TABLE t_kline_1y (LIKE t_kline_5m INCLUDING ALL);
 
 CREATE TABLE t_pool (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  pool_address VARCHAR(255) NOT NULL,
+  address VARCHAR(255) NOT NULL,
   chain_id BIGINT NOT NULL,
-  pool_type_id int NOT NULL,
-  launchpad_type_id int NOT NULL,
+  pool_type_id INT NOT NULL,
+  launchpad_type_id INT NOT NULL,
   token0_id BIGINT NOT NULL,
   token1_id BIGINT NOT NULL,
-  liquidity0 DECIMAL(60, 0) NOT NULL,
-  liquidity1 DECIMAL(60, 0) NOT NULL,
-  fee_bps int NOT NULL,
+  -- liquidity0 DECIMAL(60, 0) NOT NULL,
+  -- liquidity1 DECIMAL(60, 0) NOT NULL,
+  fee_bps INT NOT NULL,
   -- Fee rate charged by the pool (1 for 0.01%)
-  created_at TIMESTAMP NOT NULL,
-  updated_at TIMESTAMP NOT NULL,
-  UNIQUE KEY `idx_pool_address_chain_id` (`pool_address`, `chain_id`),
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY `idx_address_chain_id` (`address`, `chain_id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE `t_token` (
   `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
   `update_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `insert_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `token_name` varchar(128) NOT NULL,
+  `symbol` varchar(128) NOT NULL,
   `chain_id` BIGINT NOT NULL,
-  `token_address` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
   `decimals` int NOT NULL,
   `full_name` varchar(128) NOT NULL DEFAULT '',
   `total_supply` decimal(60, 0) NOT NULL DEFAULT '0',
+  `circulating_supply` decimal(60, 0) NOT NULL DEFAULT '0',
   `discover_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `icon` varchar(1024) NOT NULL DEFAULT '',
   `twitter` varchar(1024) NOT NULL DEFAULT '',
   `telegram` varchar(1024) NOT NULL DEFAULT '',
   `website` varchar(1024) NOT NULL DEFAULT '',
   `discord` varchar(1024) NOT NULL DEFAULT '',
-  `mcap` double NOT NULL DEFAULT '0',
-  `liquidity` double NOT NULL DEFAULT '0',
   `comment` varchar(2048) NOT NULL DEFAULT '',
   `flags` int NOT NULL DEFAULT '0',
-  UNIQUE KEY `idx_token_address_chain_id` (`token_address`, `chain_id`),
+  UNIQUE KEY `idx_address_chain_id` (`address`, `chain_id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE t_pool_type (
   id INT AUTO_INCREMENT PRIMARY KEY,
   dex_id INT NOT NULL,
-  name VARCHAR(64) NOT NULL DEFAULT '',
+  name VARCHAR(64) NOT NULL,
   version VARCHAR(64) NOT NULL DEFAULT '',
   icon VARCHAR(2000) NOT NULL DEFAULT '',
   website VARCHAR(2000) NOT NULL DEFAULT '',
-  description TEXT NOT NULL DEFAULT '',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE t_launchpad_type (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(64) NOT NULL DEFAULT '',
+  name VARCHAR(64) NOT NULL,
   version VARCHAR(64) NOT NULL DEFAULT '',
   icon VARCHAR(2000) NOT NULL DEFAULT '',
   website VARCHAR(2000) NOT NULL DEFAULT '',
-  description TEXT NOT NULL DEFAULT '',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE t_dex (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(64) NOT NULL DEFAULT '',
+  name VARCHAR(64) NOT NULL,
   version VARCHAR(64) NOT NULL DEFAULT '',
   icon VARCHAR(2000) NOT NULL DEFAULT '',
   website VARCHAR(2000) NOT NULL DEFAULT '',
-  description TEXT NOT NULL DEFAULT '',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE `t_chain_info` (
@@ -525,7 +521,6 @@ CREATE TABLE `t_object_tag` (
 --   KEY `idx_token_name` (`token_name`),
 --   KEY `idx_insert_timestamp` (`insert_timestamp`)
 -- ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
-
 CREATE TABLE `t_event_processed_block` (
   `chainid` int NOT NULL,
   `appid` int NOT NULL,
