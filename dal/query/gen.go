@@ -21,15 +21,18 @@ var (
 	TDex                 *tDex
 	TDexPool             *tDexPool
 	TEventProcessedBlock *tEventProcessedBlock
+	TFamousToken         *tFamousToken
 	TGappedBlock         *tGappedBlock
 	TKv                  *tKv
 	TLaunchpad           *tLaunchpad
 	TNodeInfo            *tNodeInfo
 	TObjectTag           *tObjectTag
 	TPool                *tPool
+	TPoolStatic          *tPoolStatic
 	TTag                 *tTag
 	TToken               *tToken
 	TTokenInfo           *tTokenInfo
+	TTokenStatic         *tTokenStatic
 	TTransfer            *tTransfer
 	TUserAccount         *tUserAccount
 	TUserAddress         *tUserAddress
@@ -41,15 +44,18 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	TDex = &Q.TDex
 	TDexPool = &Q.TDexPool
 	TEventProcessedBlock = &Q.TEventProcessedBlock
+	TFamousToken = &Q.TFamousToken
 	TGappedBlock = &Q.TGappedBlock
 	TKv = &Q.TKv
 	TLaunchpad = &Q.TLaunchpad
 	TNodeInfo = &Q.TNodeInfo
 	TObjectTag = &Q.TObjectTag
 	TPool = &Q.TPool
+	TPoolStatic = &Q.TPoolStatic
 	TTag = &Q.TTag
 	TToken = &Q.TToken
 	TTokenInfo = &Q.TTokenInfo
+	TTokenStatic = &Q.TTokenStatic
 	TTransfer = &Q.TTransfer
 	TUserAccount = &Q.TUserAccount
 	TUserAddress = &Q.TUserAddress
@@ -62,15 +68,18 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		TDex:                 newTDex(db, opts...),
 		TDexPool:             newTDexPool(db, opts...),
 		TEventProcessedBlock: newTEventProcessedBlock(db, opts...),
+		TFamousToken:         newTFamousToken(db, opts...),
 		TGappedBlock:         newTGappedBlock(db, opts...),
 		TKv:                  newTKv(db, opts...),
 		TLaunchpad:           newTLaunchpad(db, opts...),
 		TNodeInfo:            newTNodeInfo(db, opts...),
 		TObjectTag:           newTObjectTag(db, opts...),
 		TPool:                newTPool(db, opts...),
+		TPoolStatic:          newTPoolStatic(db, opts...),
 		TTag:                 newTTag(db, opts...),
 		TToken:               newTToken(db, opts...),
 		TTokenInfo:           newTTokenInfo(db, opts...),
+		TTokenStatic:         newTTokenStatic(db, opts...),
 		TTransfer:            newTTransfer(db, opts...),
 		TUserAccount:         newTUserAccount(db, opts...),
 		TUserAddress:         newTUserAddress(db, opts...),
@@ -84,15 +93,18 @@ type Query struct {
 	TDex                 tDex
 	TDexPool             tDexPool
 	TEventProcessedBlock tEventProcessedBlock
+	TFamousToken         tFamousToken
 	TGappedBlock         tGappedBlock
 	TKv                  tKv
 	TLaunchpad           tLaunchpad
 	TNodeInfo            tNodeInfo
 	TObjectTag           tObjectTag
 	TPool                tPool
+	TPoolStatic          tPoolStatic
 	TTag                 tTag
 	TToken               tToken
 	TTokenInfo           tTokenInfo
+	TTokenStatic         tTokenStatic
 	TTransfer            tTransfer
 	TUserAccount         tUserAccount
 	TUserAddress         tUserAddress
@@ -107,15 +119,18 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		TDex:                 q.TDex.clone(db),
 		TDexPool:             q.TDexPool.clone(db),
 		TEventProcessedBlock: q.TEventProcessedBlock.clone(db),
+		TFamousToken:         q.TFamousToken.clone(db),
 		TGappedBlock:         q.TGappedBlock.clone(db),
 		TKv:                  q.TKv.clone(db),
 		TLaunchpad:           q.TLaunchpad.clone(db),
 		TNodeInfo:            q.TNodeInfo.clone(db),
 		TObjectTag:           q.TObjectTag.clone(db),
 		TPool:                q.TPool.clone(db),
+		TPoolStatic:          q.TPoolStatic.clone(db),
 		TTag:                 q.TTag.clone(db),
 		TToken:               q.TToken.clone(db),
 		TTokenInfo:           q.TTokenInfo.clone(db),
+		TTokenStatic:         q.TTokenStatic.clone(db),
 		TTransfer:            q.TTransfer.clone(db),
 		TUserAccount:         q.TUserAccount.clone(db),
 		TUserAddress:         q.TUserAddress.clone(db),
@@ -137,15 +152,18 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		TDex:                 q.TDex.replaceDB(db),
 		TDexPool:             q.TDexPool.replaceDB(db),
 		TEventProcessedBlock: q.TEventProcessedBlock.replaceDB(db),
+		TFamousToken:         q.TFamousToken.replaceDB(db),
 		TGappedBlock:         q.TGappedBlock.replaceDB(db),
 		TKv:                  q.TKv.replaceDB(db),
 		TLaunchpad:           q.TLaunchpad.replaceDB(db),
 		TNodeInfo:            q.TNodeInfo.replaceDB(db),
 		TObjectTag:           q.TObjectTag.replaceDB(db),
 		TPool:                q.TPool.replaceDB(db),
+		TPoolStatic:          q.TPoolStatic.replaceDB(db),
 		TTag:                 q.TTag.replaceDB(db),
 		TToken:               q.TToken.replaceDB(db),
 		TTokenInfo:           q.TTokenInfo.replaceDB(db),
+		TTokenStatic:         q.TTokenStatic.replaceDB(db),
 		TTransfer:            q.TTransfer.replaceDB(db),
 		TUserAccount:         q.TUserAccount.replaceDB(db),
 		TUserAddress:         q.TUserAddress.replaceDB(db),
@@ -157,15 +175,18 @@ type queryCtx struct {
 	TDex                 ITDexDo
 	TDexPool             ITDexPoolDo
 	TEventProcessedBlock ITEventProcessedBlockDo
+	TFamousToken         ITFamousTokenDo
 	TGappedBlock         ITGappedBlockDo
 	TKv                  ITKvDo
 	TLaunchpad           ITLaunchpadDo
 	TNodeInfo            ITNodeInfoDo
 	TObjectTag           ITObjectTagDo
 	TPool                ITPoolDo
+	TPoolStatic          ITPoolStaticDo
 	TTag                 ITTagDo
 	TToken               ITTokenDo
 	TTokenInfo           ITTokenInfoDo
+	TTokenStatic         ITTokenStaticDo
 	TTransfer            ITTransferDo
 	TUserAccount         ITUserAccountDo
 	TUserAddress         ITUserAddressDo
@@ -177,15 +198,18 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		TDex:                 q.TDex.WithContext(ctx),
 		TDexPool:             q.TDexPool.WithContext(ctx),
 		TEventProcessedBlock: q.TEventProcessedBlock.WithContext(ctx),
+		TFamousToken:         q.TFamousToken.WithContext(ctx),
 		TGappedBlock:         q.TGappedBlock.WithContext(ctx),
 		TKv:                  q.TKv.WithContext(ctx),
 		TLaunchpad:           q.TLaunchpad.WithContext(ctx),
 		TNodeInfo:            q.TNodeInfo.WithContext(ctx),
 		TObjectTag:           q.TObjectTag.WithContext(ctx),
 		TPool:                q.TPool.WithContext(ctx),
+		TPoolStatic:          q.TPoolStatic.WithContext(ctx),
 		TTag:                 q.TTag.WithContext(ctx),
 		TToken:               q.TToken.WithContext(ctx),
 		TTokenInfo:           q.TTokenInfo.WithContext(ctx),
+		TTokenStatic:         q.TTokenStatic.WithContext(ctx),
 		TTransfer:            q.TTransfer.WithContext(ctx),
 		TUserAccount:         q.TUserAccount.WithContext(ctx),
 		TUserAddress:         q.TUserAddress.WithContext(ctx),

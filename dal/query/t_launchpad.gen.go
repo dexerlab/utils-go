@@ -30,6 +30,7 @@ func newTLaunchpad(db *gorm.DB, opts ...gen.DOOption) tLaunchpad {
 	_tLaunchpad.ID = field.NewInt32(tableName, "id")
 	_tLaunchpad.Name = field.NewString(tableName, "name")
 	_tLaunchpad.Version = field.NewString(tableName, "version")
+	_tLaunchpad.Factory = field.NewString(tableName, "factory")
 	_tLaunchpad.Icon = field.NewString(tableName, "icon")
 	_tLaunchpad.Website = field.NewString(tableName, "website")
 	_tLaunchpad.CreatedAt = field.NewTime(tableName, "created_at")
@@ -47,6 +48,7 @@ type tLaunchpad struct {
 	ID        field.Int32
 	Name      field.String
 	Version   field.String
+	Factory   field.String
 	Icon      field.String
 	Website   field.String
 	CreatedAt field.Time
@@ -70,6 +72,7 @@ func (t *tLaunchpad) updateTableName(table string) *tLaunchpad {
 	t.ID = field.NewInt32(table, "id")
 	t.Name = field.NewString(table, "name")
 	t.Version = field.NewString(table, "version")
+	t.Factory = field.NewString(table, "factory")
 	t.Icon = field.NewString(table, "icon")
 	t.Website = field.NewString(table, "website")
 	t.CreatedAt = field.NewTime(table, "created_at")
@@ -100,10 +103,11 @@ func (t *tLaunchpad) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (t *tLaunchpad) fillFieldMap() {
-	t.fieldMap = make(map[string]field.Expr, 7)
+	t.fieldMap = make(map[string]field.Expr, 8)
 	t.fieldMap["id"] = t.ID
 	t.fieldMap["name"] = t.Name
 	t.fieldMap["version"] = t.Version
+	t.fieldMap["factory"] = t.Factory
 	t.fieldMap["icon"] = t.Icon
 	t.fieldMap["website"] = t.Website
 	t.fieldMap["created_at"] = t.CreatedAt

@@ -5,23 +5,19 @@
 package model
 
 import (
-	"time"
+	"github.com/shopspring/decimal"
 )
 
 const TableNameTPool = "t_pool"
 
 // TPool mapped from table <t_pool>
 type TPool struct {
-	ID          int64     `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true" json:"id,string"`
-	Address     string    `gorm:"column:address;type:varchar(255);not null" json:"address"`
-	ChainID     int64     `gorm:"column:chain_id;type:bigint;not null" json:"chain_id,string"`
-	DexPoolID   int32     `gorm:"column:dex_pool_id;type:int;not null" json:"dex_pool_id"`
-	LaunchpadID int32     `gorm:"column:launchpad_id;type:int;not null" json:"launchpad_id"`
-	Token0ID    int64     `gorm:"column:token0_id;type:bigint;not null" json:"token0_id,string"`
-	Token1ID    int64     `gorm:"column:token1_id;type:bigint;not null" json:"token1_id,string"`
-	FeeBps      int32     `gorm:"column:fee_bps;type:int;not null" json:"fee_bps"`
-	CreatedAt   time.Time `gorm:"column:created_at;type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
-	UpdatedAt   time.Time `gorm:"column:updated_at;type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"updated_at"`
+	ID         int64           `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true" json:"id,string"`
+	ChainID    int64           `gorm:"column:chain_id;type:bigint;not null" json:"chain_id,string"`
+	Address    string          `gorm:"column:address;type:varchar(255);not null" json:"address"`
+	Liquidity0 decimal.Decimal `gorm:"column:liquidity0;type:decimal(60,0);not null" json:"liquidity0"`
+	Liquidity1 decimal.Decimal `gorm:"column:liquidity1;type:decimal(60,0);not null" json:"liquidity1"`
+	Block      int64           `gorm:"column:block;type:bigint;not null" json:"block,string"`
 }
 
 // TableName TPool's table name

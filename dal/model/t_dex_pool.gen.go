@@ -18,6 +18,7 @@ type TDexPool struct {
 	Version   string    `gorm:"column:version;type:varchar(64);not null" json:"version"`
 	Icon      string    `gorm:"column:icon;type:varchar(2000);not null" json:"icon"`
 	Website   string    `gorm:"column:website;type:varchar(2000);not null" json:"website"`
+	Factory   string    `gorm:"column:factory;type:varchar(4095);not null" json:"factory"`
 	CreatedAt time.Time `gorm:"column:created_at;type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt time.Time `gorm:"column:updated_at;type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"updated_at"`
 }

@@ -3,8 +3,6 @@ CREATE TABLE t_trade (
   ts TIMESTAMP,
   -- Time of the trade
   pool_id BIGINT,
-  -- 'long' does not exist in Postgres, use BIGINT
-  is_buy BOOLEAN,
   -- Buy (true), Sell (false)
   priceu DOUBLE PRECISION,
   price01 DOUBLE PRECISION,
@@ -12,7 +10,15 @@ CREATE TABLE t_trade (
   amount0 DOUBLE PRECISION,
   amount1 DOUBLE PRECISION,
   amountu DOUBLE PRECISION -- amountu in u
-) timestamp(ts) PARTITION BY HOUR TTL 10 DAY WAL DEDUP UPSERT KEYS(ts, pool_id);
+) timestamp(ts) PARTITION BY HOUR WAL DEDUP UPSERT KEYS(ts, pool_id);
+
+CREATE TABLE t_liquidity_modify (
+  ts TIMESTAMP,
+  pool_id BIGINT,
+  amount0 DECIMAL(60, 0),
+  amount1 DECIMAL(60, 0),
+  amountu DOUBLE PRECISION
+) timestamp(ts) PARTITION BY HOUR WAL DEDUP UPSERT KEYS(ts, pool_id);
 
 /*
  SELECT 'DROP MATERIALIZED VIEW ' || table_name || ';' 
@@ -33,14 +39,14 @@ CREATE MATERIALIZED VIEW t_kline_5m AS (
     max(price01) high01,
     min(price01) low01,
     last(price01) close01,
-    sum(amount0 * is_buy :: int) buy0,
-    sum(amount0 * (NOT is_buy) :: int) sell0,
-    sum(amount1 * is_buy :: int) buy1,
-    sum(amount1 * (NOT is_buy) :: int) sell1,
-    sum(amountu * is_buy :: int) buyu,
-    sum(amountu * (NOT is_buy) :: int) sellu,
-    sum(is_buy :: int) AS buys,
-    sum((NOT is_buy) :: int) AS sells
+    sum(abs(least(amount0, 0))) AS buy0,
+    sum(greatest(amount0, 0)) AS sell0,
+    sum(abs(least(amount1, 0))) AS buy1,
+    sum(greatest(amount1, 0)) AS sell1,
+    sum((amount0 < 0) :: int * amountu) AS buyu,
+    sum((amount0 > 0) :: int * amountu) AS sellu,
+    sum((amount0 < 0) :: int) AS buys,
+    sum((amount0 > 0) :: int) AS sells
   FROM
     t_trade SAMPLE BY 5m ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY DAY;
@@ -58,14 +64,14 @@ CREATE MATERIALIZED VIEW t_kline_15m AS (
     max(price01) high01,
     min(price01) low01,
     last(price01) close01,
-    sum(amount0 * is_buy :: int) buy0,
-    sum(amount0 * (NOT is_buy) :: int) sell0,
-    sum(amount1 * is_buy :: int) buy1,
-    sum(amount1 * (NOT is_buy) :: int) sell1,
-    sum(amountu * is_buy :: int) buyu,
-    sum(amountu * (NOT is_buy) :: int) sellu,
-    sum(is_buy :: int) AS buys,
-    sum((NOT is_buy) :: int) AS sells
+    sum(abs(least(amount0, 0))) AS buy0,
+    sum(greatest(amount0, 0)) AS sell0,
+    sum(abs(least(amount1, 0))) AS buy1,
+    sum(greatest(amount1, 0)) AS sell1,
+    sum((amount0 < 0) :: int * amountu) AS buyu,
+    sum((amount0 > 0) :: int * amountu) AS sellu,
+    sum((amount0 < 0) :: int) AS buys,
+    sum((amount0 > 0) :: int) AS sells
   FROM
     t_trade SAMPLE BY 15m ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY DAY;
@@ -83,14 +89,14 @@ CREATE MATERIALIZED VIEW t_kline_30m AS (
     max(price01) high01,
     min(price01) low01,
     last(price01) close01,
-    sum(amount0 * is_buy :: int) buy0,
-    sum(amount0 * (NOT is_buy) :: int) sell0,
-    sum(amount1 * is_buy :: int) buy1,
-    sum(amount1 * (NOT is_buy) :: int) sell1,
-    sum(amountu * is_buy :: int) buyu,
-    sum(amountu * (NOT is_buy) :: int) sellu,
-    sum(is_buy :: int) AS buys,
-    sum((NOT is_buy) :: int) AS sells
+    sum(abs(least(amount0, 0))) AS buy0,
+    sum(greatest(amount0, 0)) AS sell0,
+    sum(abs(least(amount1, 0))) AS buy1,
+    sum(greatest(amount1, 0)) AS sell1,
+    sum((amount0 < 0) :: int * amountu) AS buyu,
+    sum((amount0 > 0) :: int * amountu) AS sellu,
+    sum((amount0 < 0) :: int) AS buys,
+    sum((amount0 > 0) :: int) AS sells
   FROM
     t_trade SAMPLE BY 30m ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY DAY;
@@ -108,14 +114,14 @@ CREATE MATERIALIZED VIEW t_kline_1h AS (
     max(price01) high01,
     min(price01) low01,
     last(price01) close01,
-    sum(amount0 * is_buy :: int) buy0,
-    sum(amount0 * (NOT is_buy) :: int) sell0,
-    sum(amount1 * is_buy :: int) buy1,
-    sum(amount1 * (NOT is_buy) :: int) sell1,
-    sum(amountu * is_buy :: int) buyu,
-    sum(amountu * (NOT is_buy) :: int) sellu,
-    sum(is_buy :: int) AS buys,
-    sum((NOT is_buy) :: int) AS sells
+    sum(abs(least(amount0, 0))) AS buy0,
+    sum(greatest(amount0, 0)) AS sell0,
+    sum(abs(least(amount1, 0))) AS buy1,
+    sum(greatest(amount1, 0)) AS sell1,
+    sum((amount0 < 0) :: int * amountu) AS buyu,
+    sum((amount0 > 0) :: int * amountu) AS sellu,
+    sum((amount0 < 0) :: int) AS buys,
+    sum((amount0 > 0) :: int) AS sells
   FROM
     t_trade SAMPLE BY 1h ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY WEEK;
@@ -133,14 +139,14 @@ CREATE MATERIALIZED VIEW t_kline_4h AS (
     max(price01) high01,
     min(price01) low01,
     last(price01) close01,
-    sum(amount0 * is_buy :: int) buy0,
-    sum(amount0 * (NOT is_buy) :: int) sell0,
-    sum(amount1 * is_buy :: int) buy1,
-    sum(amount1 * (NOT is_buy) :: int) sell1,
-    sum(amountu * is_buy :: int) buyu,
-    sum(amountu * (NOT is_buy) :: int) sellu,
-    sum(is_buy :: int) AS buys,
-    sum((NOT is_buy) :: int) AS sells
+    sum(abs(least(amount0, 0))) AS buy0,
+    sum(greatest(amount0, 0)) AS sell0,
+    sum(abs(least(amount1, 0))) AS buy1,
+    sum(greatest(amount1, 0)) AS sell1,
+    sum((amount0 < 0) :: int * amountu) AS buyu,
+    sum((amount0 > 0) :: int * amountu) AS sellu,
+    sum((amount0 < 0) :: int) AS buys,
+    sum((amount0 > 0) :: int) AS sells
   FROM
     t_trade SAMPLE BY 4h ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY WEEK;
@@ -158,14 +164,14 @@ CREATE MATERIALIZED VIEW t_kline_12h AS (
     max(price01) high01,
     min(price01) low01,
     last(price01) close01,
-    sum(amount0 * is_buy :: int) buy0,
-    sum(amount0 * (NOT is_buy) :: int) sell0,
-    sum(amount1 * is_buy :: int) buy1,
-    sum(amount1 * (NOT is_buy) :: int) sell1,
-    sum(amountu * is_buy :: int) buyu,
-    sum(amountu * (NOT is_buy) :: int) sellu,
-    sum(is_buy :: int) AS buys,
-    sum((NOT is_buy) :: int) AS sells
+    sum(abs(least(amount0, 0))) AS buy0,
+    sum(greatest(amount0, 0)) AS sell0,
+    sum(abs(least(amount1, 0))) AS buy1,
+    sum(greatest(amount1, 0)) AS sell1,
+    sum((amount0 < 0) :: int * amountu) AS buyu,
+    sum((amount0 > 0) :: int * amountu) AS sellu,
+    sum((amount0 < 0) :: int) AS buys,
+    sum((amount0 > 0) :: int) AS sells
   FROM
     t_trade SAMPLE BY 12h ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY MONTH;
@@ -183,14 +189,14 @@ CREATE MATERIALIZED VIEW t_kline_1d AS (
     max(price01) high01,
     min(price01) low01,
     last(price01) close01,
-    sum(amount0 * is_buy :: int) buy0,
-    sum(amount0 * (NOT is_buy) :: int) sell0,
-    sum(amount1 * is_buy :: int) buy1,
-    sum(amount1 * (NOT is_buy) :: int) sell1,
-    sum(amountu * is_buy :: int) buyu,
-    sum(amountu * (NOT is_buy) :: int) sellu,
-    sum(is_buy :: int) AS buys,
-    sum((NOT is_buy) :: int) AS sells
+    sum(abs(least(amount0, 0))) AS buy0,
+    sum(greatest(amount0, 0)) AS sell0,
+    sum(abs(least(amount1, 0))) AS buy1,
+    sum(greatest(amount1, 0)) AS sell1,
+    sum((amount0 < 0) :: int * amountu) AS buyu,
+    sum((amount0 > 0) :: int * amountu) AS sellu,
+    sum((amount0 < 0) :: int) AS buys,
+    sum((amount0 > 0) :: int) AS sells
   FROM
     t_trade SAMPLE BY 1d ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY MONTH;
@@ -208,14 +214,14 @@ CREATE MATERIALIZED VIEW t_kline_1w AS (
     max(price01) high01,
     min(price01) low01,
     last(price01) close01,
-    sum(amount0 * is_buy :: int) buy0,
-    sum(amount0 * (NOT is_buy) :: int) sell0,
-    sum(amount1 * is_buy :: int) buy1,
-    sum(amount1 * (NOT is_buy) :: int) sell1,
-    sum(amountu * is_buy :: int) buyu,
-    sum(amountu * (NOT is_buy) :: int) sellu,
-    sum(is_buy :: int) AS buys,
-    sum((NOT is_buy) :: int) AS sells
+    sum(abs(least(amount0, 0))) AS buy0,
+    sum(greatest(amount0, 0)) AS sell0,
+    sum(abs(least(amount1, 0))) AS buy1,
+    sum(greatest(amount1, 0)) AS sell1,
+    sum((amount0 < 0) :: int * amountu) AS buyu,
+    sum((amount0 > 0) :: int * amountu) AS sellu,
+    sum((amount0 < 0) :: int) AS buys,
+    sum((amount0 > 0) :: int) AS sells
   FROM
     t_trade SAMPLE BY 1w ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY YEAR;
@@ -233,14 +239,14 @@ CREATE MATERIALIZED VIEW t_kline_1mo AS (
     max(price01) high01,
     min(price01) low01,
     last(price01) close01,
-    sum(amount0 * is_buy :: int) buy0,
-    sum(amount0 * (NOT is_buy) :: int) sell0,
-    sum(amount1 * is_buy :: int) buy1,
-    sum(amount1 * (NOT is_buy) :: int) sell1,
-    sum(amountu * is_buy :: int) buyu,
-    sum(amountu * (NOT is_buy) :: int) sellu,
-    sum(is_buy :: int) AS buys,
-    sum((NOT is_buy) :: int) AS sells
+    sum(abs(least(amount0, 0))) AS buy0,
+    sum(greatest(amount0, 0)) AS sell0,
+    sum(abs(least(amount1, 0))) AS buy1,
+    sum(greatest(amount1, 0)) AS sell1,
+    sum((amount0 < 0) :: int * amountu) AS buyu,
+    sum((amount0 > 0) :: int * amountu) AS sellu,
+    sum((amount0 < 0) :: int) AS buys,
+    sum((amount0 > 0) :: int) AS sells
   FROM
     t_trade SAMPLE BY 1M ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY YEAR;
@@ -258,14 +264,14 @@ CREATE MATERIALIZED VIEW t_kline_1y AS (
     max(price01) high01,
     min(price01) low01,
     last(price01) close01,
-    sum(amount0 * is_buy :: int) buy0,
-    sum(amount0 * (NOT is_buy) :: int) sell0,
-    sum(amount1 * is_buy :: int) buy1,
-    sum(amount1 * (NOT is_buy) :: int) sell1,
-    sum(amountu * is_buy :: int) buyu,
-    sum(amountu * (NOT is_buy) :: int) sellu,
-    sum(is_buy :: int) AS buys,
-    sum((NOT is_buy) :: int) AS sells
+    sum(abs(least(amount0, 0))) AS buy0,
+    sum(greatest(amount0, 0)) AS sell0,
+    sum(abs(least(amount1, 0))) AS buy1,
+    sum(greatest(amount1, 0)) AS sell1,
+    sum((amount0 < 0) :: int * amountu) AS buyu,
+    sum((amount0 > 0) :: int * amountu) AS sellu,
+    sum((amount0 < 0) :: int) AS buys,
+    sum((amount0 > 0) :: int) AS sells
   FROM
     t_trade SAMPLE BY 1y ALIGN TO CALENDAR
 ) timestamp(ts) PARTITION BY YEAR;
@@ -275,15 +281,19 @@ CREATE MATERIALIZED VIEW t_kline_1y AS (
 -- ***********************
 CREATE TABLE t_trade (
   ts TIMESTAMP NOT NULL,
-  -- Time of the trade
   pool_id BIGINT NOT NULL,
-  -- 'long' does not exist in Postgres, use BIGINT
-  is_buy BOOLEAN NOT NULL,
-  -- Buy (true), Sell (false)
   priceu DOUBLE PRECISION NOT NULL,
   price01 DOUBLE PRECISION NOT NULL,
   amount0 DOUBLE PRECISION NOT NULL,
   amount1 DOUBLE PRECISION NOT NULL,
+  amountu DOUBLE PRECISION NOT NULL
+);
+
+CREATE TABLE t_liquidity_modify (
+  ts TIMESTAMP NOT NULL,
+  pool_id BIGINT NOT NULL,
+  amount0 DECIMAL(60, 0) NOT NULL,
+  amount1 DECIMAL(60, 0) NOT NULL,
   amountu DOUBLE PRECISION NOT NULL
 );
 
@@ -334,28 +344,39 @@ CREATE TABLE t_kline_1y (LIKE t_kline_5m INCLUDING ALL);
 
 CREATE TABLE t_pool (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  address VARCHAR(255) NOT NULL,
   chain_id BIGINT NOT NULL,
+  address VARCHAR(255) NOT NULL,
+  liquidity0 DECIMAL(60, 0) NOT NULL,
+  liquidity1 DECIMAL(60, 0) NOT NULL,
+  block BIGINT NOT NULL,
+  UNIQUE KEY `idx_address_chain_id` (`address`, `chain_id`)
+);
+
+CREATE TABLE t_token (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  chain_id BIGINT NOT NULL,
+  address VARCHAR(255) NOT NULL,
+  priceu DOUBLE DEFAULT NULL,
+  UNIQUE KEY `idx_address_chain_id` (`address`, `chain_id`)
+);
+
+CREATE TABLE t_token_stale (LIKE t_token INCLUDING ALL);
+
+CREATE TABLE t_pool_static (
+  pool_id BIGINT PRIMARY KEY,
   dex_pool_id INT NOT NULL,
   launchpad_id INT NOT NULL,
   token0_id BIGINT NOT NULL,
   token1_id BIGINT NOT NULL,
-  -- liquidity0 DECIMAL(60, 0) NOT NULL,
-  -- liquidity1 DECIMAL(60, 0) NOT NULL,
-  fee_bps INT NOT NULL,
-  -- Fee rate charged by the pool (1 for 0.01%)
+  fee_ppm INT NOT NULL,
+  -- Fee rate charged by the pool (1 for 0.0001%)
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY `idx_address_chain_id` (`address`, `chain_id`)
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
-CREATE TABLE `t_token` (
-  `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-  `update_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `insert_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+CREATE TABLE `t_token_static` (
+  `token_id` BIGINT PRIMARY KEY,
   `symbol` varchar(128) NOT NULL,
-  `chain_id` BIGINT NOT NULL,
-  `address` varchar(255) NOT NULL,
   `decimals` int NOT NULL,
   `full_name` varchar(128) NOT NULL DEFAULT '',
   `total_supply` decimal(60, 0) NOT NULL DEFAULT '0',
@@ -368,7 +389,8 @@ CREATE TABLE `t_token` (
   `discord` varchar(1024) NOT NULL DEFAULT '',
   `comment` varchar(2048) NOT NULL DEFAULT '',
   `flags` int NOT NULL DEFAULT '0',
-  UNIQUE KEY `idx_address_chain_id` (`address`, `chain_id`)
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE t_dex_pool (
@@ -409,8 +431,6 @@ CREATE TABLE t_dex (
 
 CREATE TABLE `t_famous_token` (
   `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `update_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `insert_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `token_name` varchar(128) NOT NULL,
   `chain_name` varchar(64) NOT NULL,
   `token_address` varchar(128) NOT NULL,
@@ -421,7 +441,9 @@ CREATE TABLE `t_famous_token` (
   `total_supply` decimal(64, 0) NOT NULL DEFAULT '0',
   `icon` varchar(1024) NOT NULL DEFAULT '',
   `flags` int NOT NULL DEFAULT '0',
-  UNIQUE KEY `idx_chain_name_token_name` (`chain_name`, `token_name`),
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY `idx_chain_name_token_name` (`chain_name`, `token_name`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE `t_chain_info` (

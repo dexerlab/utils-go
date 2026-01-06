@@ -28,23 +28,9 @@ func newTToken(db *gorm.DB, opts ...gen.DOOption) tToken {
 	tableName := _tToken.tTokenDo.TableName()
 	_tToken.ALL = field.NewAsterisk(tableName)
 	_tToken.ID = field.NewInt64(tableName, "id")
-	_tToken.UpdateTimestamp = field.NewTime(tableName, "update_timestamp")
-	_tToken.InsertTimestamp = field.NewTime(tableName, "insert_timestamp")
-	_tToken.Symbol = field.NewString(tableName, "symbol")
 	_tToken.ChainID = field.NewInt64(tableName, "chain_id")
 	_tToken.Address = field.NewString(tableName, "address")
-	_tToken.Decimals = field.NewInt32(tableName, "decimals")
-	_tToken.FullName = field.NewString(tableName, "full_name")
-	_tToken.TotalSupply = field.NewField(tableName, "total_supply")
-	_tToken.CirculatingSupply = field.NewField(tableName, "circulating_supply")
-	_tToken.DiscoverTimestamp = field.NewTime(tableName, "discover_timestamp")
-	_tToken.Icon = field.NewString(tableName, "icon")
-	_tToken.Twitter = field.NewString(tableName, "twitter")
-	_tToken.Telegram = field.NewString(tableName, "telegram")
-	_tToken.Website = field.NewString(tableName, "website")
-	_tToken.Discord = field.NewString(tableName, "discord")
-	_tToken.Comment = field.NewString(tableName, "comment")
-	_tToken.Flags = field.NewInt32(tableName, "flags")
+	_tToken.Priceu = field.NewFloat64(tableName, "priceu")
 
 	_tToken.fillFieldMap()
 
@@ -54,25 +40,11 @@ func newTToken(db *gorm.DB, opts ...gen.DOOption) tToken {
 type tToken struct {
 	tTokenDo tTokenDo
 
-	ALL               field.Asterisk
-	ID                field.Int64
-	UpdateTimestamp   field.Time
-	InsertTimestamp   field.Time
-	Symbol            field.String
-	ChainID           field.Int64
-	Address           field.String
-	Decimals          field.Int32
-	FullName          field.String
-	TotalSupply       field.Field
-	CirculatingSupply field.Field
-	DiscoverTimestamp field.Time
-	Icon              field.String
-	Twitter           field.String
-	Telegram          field.String
-	Website           field.String
-	Discord           field.String
-	Comment           field.String
-	Flags             field.Int32
+	ALL     field.Asterisk
+	ID      field.Int64
+	ChainID field.Int64
+	Address field.String
+	Priceu  field.Float64
 
 	fieldMap map[string]field.Expr
 }
@@ -90,23 +62,9 @@ func (t tToken) As(alias string) *tToken {
 func (t *tToken) updateTableName(table string) *tToken {
 	t.ALL = field.NewAsterisk(table)
 	t.ID = field.NewInt64(table, "id")
-	t.UpdateTimestamp = field.NewTime(table, "update_timestamp")
-	t.InsertTimestamp = field.NewTime(table, "insert_timestamp")
-	t.Symbol = field.NewString(table, "symbol")
 	t.ChainID = field.NewInt64(table, "chain_id")
 	t.Address = field.NewString(table, "address")
-	t.Decimals = field.NewInt32(table, "decimals")
-	t.FullName = field.NewString(table, "full_name")
-	t.TotalSupply = field.NewField(table, "total_supply")
-	t.CirculatingSupply = field.NewField(table, "circulating_supply")
-	t.DiscoverTimestamp = field.NewTime(table, "discover_timestamp")
-	t.Icon = field.NewString(table, "icon")
-	t.Twitter = field.NewString(table, "twitter")
-	t.Telegram = field.NewString(table, "telegram")
-	t.Website = field.NewString(table, "website")
-	t.Discord = field.NewString(table, "discord")
-	t.Comment = field.NewString(table, "comment")
-	t.Flags = field.NewInt32(table, "flags")
+	t.Priceu = field.NewFloat64(table, "priceu")
 
 	t.fillFieldMap()
 
@@ -131,25 +89,11 @@ func (t *tToken) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (t *tToken) fillFieldMap() {
-	t.fieldMap = make(map[string]field.Expr, 18)
+	t.fieldMap = make(map[string]field.Expr, 4)
 	t.fieldMap["id"] = t.ID
-	t.fieldMap["update_timestamp"] = t.UpdateTimestamp
-	t.fieldMap["insert_timestamp"] = t.InsertTimestamp
-	t.fieldMap["symbol"] = t.Symbol
 	t.fieldMap["chain_id"] = t.ChainID
 	t.fieldMap["address"] = t.Address
-	t.fieldMap["decimals"] = t.Decimals
-	t.fieldMap["full_name"] = t.FullName
-	t.fieldMap["total_supply"] = t.TotalSupply
-	t.fieldMap["circulating_supply"] = t.CirculatingSupply
-	t.fieldMap["discover_timestamp"] = t.DiscoverTimestamp
-	t.fieldMap["icon"] = t.Icon
-	t.fieldMap["twitter"] = t.Twitter
-	t.fieldMap["telegram"] = t.Telegram
-	t.fieldMap["website"] = t.Website
-	t.fieldMap["discord"] = t.Discord
-	t.fieldMap["comment"] = t.Comment
-	t.fieldMap["flags"] = t.Flags
+	t.fieldMap["priceu"] = t.Priceu
 }
 
 func (t tToken) clone(db *gorm.DB) tToken {

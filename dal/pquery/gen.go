@@ -16,18 +16,19 @@ import (
 )
 
 var (
-	Q         = new(Query)
-	TKline12H *tKline12H
-	TKline15M *tKline15M
-	TKline1D  *tKline1D
-	TKline1H  *tKline1H
-	TKline1Mo *tKline1Mo
-	TKline1W  *tKline1W
-	TKline1Y  *tKline1Y
-	TKline30M *tKline30M
-	TKline4H  *tKline4H
-	TKline5M  *tKline5M
-	TTrade    *tTrade
+	Q                = new(Query)
+	TKline12H        *tKline12H
+	TKline15M        *tKline15M
+	TKline1D         *tKline1D
+	TKline1H         *tKline1H
+	TKline1Mo        *tKline1Mo
+	TKline1W         *tKline1W
+	TKline1Y         *tKline1Y
+	TKline30M        *tKline30M
+	TKline4H         *tKline4H
+	TKline5M         *tKline5M
+	TLiquidityModify *tLiquidityModify
+	TTrade           *tTrade
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
@@ -42,58 +43,62 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	TKline30M = &Q.TKline30M
 	TKline4H = &Q.TKline4H
 	TKline5M = &Q.TKline5M
+	TLiquidityModify = &Q.TLiquidityModify
 	TTrade = &Q.TTrade
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
-		db:        db,
-		TKline12H: newTKline12H(db, opts...),
-		TKline15M: newTKline15M(db, opts...),
-		TKline1D:  newTKline1D(db, opts...),
-		TKline1H:  newTKline1H(db, opts...),
-		TKline1Mo: newTKline1Mo(db, opts...),
-		TKline1W:  newTKline1W(db, opts...),
-		TKline1Y:  newTKline1Y(db, opts...),
-		TKline30M: newTKline30M(db, opts...),
-		TKline4H:  newTKline4H(db, opts...),
-		TKline5M:  newTKline5M(db, opts...),
-		TTrade:    newTTrade(db, opts...),
+		db:               db,
+		TKline12H:        newTKline12H(db, opts...),
+		TKline15M:        newTKline15M(db, opts...),
+		TKline1D:         newTKline1D(db, opts...),
+		TKline1H:         newTKline1H(db, opts...),
+		TKline1Mo:        newTKline1Mo(db, opts...),
+		TKline1W:         newTKline1W(db, opts...),
+		TKline1Y:         newTKline1Y(db, opts...),
+		TKline30M:        newTKline30M(db, opts...),
+		TKline4H:         newTKline4H(db, opts...),
+		TKline5M:         newTKline5M(db, opts...),
+		TLiquidityModify: newTLiquidityModify(db, opts...),
+		TTrade:           newTTrade(db, opts...),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	TKline12H tKline12H
-	TKline15M tKline15M
-	TKline1D  tKline1D
-	TKline1H  tKline1H
-	TKline1Mo tKline1Mo
-	TKline1W  tKline1W
-	TKline1Y  tKline1Y
-	TKline30M tKline30M
-	TKline4H  tKline4H
-	TKline5M  tKline5M
-	TTrade    tTrade
+	TKline12H        tKline12H
+	TKline15M        tKline15M
+	TKline1D         tKline1D
+	TKline1H         tKline1H
+	TKline1Mo        tKline1Mo
+	TKline1W         tKline1W
+	TKline1Y         tKline1Y
+	TKline30M        tKline30M
+	TKline4H         tKline4H
+	TKline5M         tKline5M
+	TLiquidityModify tLiquidityModify
+	TTrade           tTrade
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:        db,
-		TKline12H: q.TKline12H.clone(db),
-		TKline15M: q.TKline15M.clone(db),
-		TKline1D:  q.TKline1D.clone(db),
-		TKline1H:  q.TKline1H.clone(db),
-		TKline1Mo: q.TKline1Mo.clone(db),
-		TKline1W:  q.TKline1W.clone(db),
-		TKline1Y:  q.TKline1Y.clone(db),
-		TKline30M: q.TKline30M.clone(db),
-		TKline4H:  q.TKline4H.clone(db),
-		TKline5M:  q.TKline5M.clone(db),
-		TTrade:    q.TTrade.clone(db),
+		db:               db,
+		TKline12H:        q.TKline12H.clone(db),
+		TKline15M:        q.TKline15M.clone(db),
+		TKline1D:         q.TKline1D.clone(db),
+		TKline1H:         q.TKline1H.clone(db),
+		TKline1Mo:        q.TKline1Mo.clone(db),
+		TKline1W:         q.TKline1W.clone(db),
+		TKline1Y:         q.TKline1Y.clone(db),
+		TKline30M:        q.TKline30M.clone(db),
+		TKline4H:         q.TKline4H.clone(db),
+		TKline5M:         q.TKline5M.clone(db),
+		TLiquidityModify: q.TLiquidityModify.clone(db),
+		TTrade:           q.TTrade.clone(db),
 	}
 }
 
@@ -107,48 +112,51 @@ func (q *Query) WriteDB() *Query {
 
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
-		db:        db,
-		TKline12H: q.TKline12H.replaceDB(db),
-		TKline15M: q.TKline15M.replaceDB(db),
-		TKline1D:  q.TKline1D.replaceDB(db),
-		TKline1H:  q.TKline1H.replaceDB(db),
-		TKline1Mo: q.TKline1Mo.replaceDB(db),
-		TKline1W:  q.TKline1W.replaceDB(db),
-		TKline1Y:  q.TKline1Y.replaceDB(db),
-		TKline30M: q.TKline30M.replaceDB(db),
-		TKline4H:  q.TKline4H.replaceDB(db),
-		TKline5M:  q.TKline5M.replaceDB(db),
-		TTrade:    q.TTrade.replaceDB(db),
+		db:               db,
+		TKline12H:        q.TKline12H.replaceDB(db),
+		TKline15M:        q.TKline15M.replaceDB(db),
+		TKline1D:         q.TKline1D.replaceDB(db),
+		TKline1H:         q.TKline1H.replaceDB(db),
+		TKline1Mo:        q.TKline1Mo.replaceDB(db),
+		TKline1W:         q.TKline1W.replaceDB(db),
+		TKline1Y:         q.TKline1Y.replaceDB(db),
+		TKline30M:        q.TKline30M.replaceDB(db),
+		TKline4H:         q.TKline4H.replaceDB(db),
+		TKline5M:         q.TKline5M.replaceDB(db),
+		TLiquidityModify: q.TLiquidityModify.replaceDB(db),
+		TTrade:           q.TTrade.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
-	TKline12H ITKline12HDo
-	TKline15M ITKline15MDo
-	TKline1D  ITKline1DDo
-	TKline1H  ITKline1HDo
-	TKline1Mo ITKline1MoDo
-	TKline1W  ITKline1WDo
-	TKline1Y  ITKline1YDo
-	TKline30M ITKline30MDo
-	TKline4H  ITKline4HDo
-	TKline5M  ITKline5MDo
-	TTrade    ITTradeDo
+	TKline12H        ITKline12HDo
+	TKline15M        ITKline15MDo
+	TKline1D         ITKline1DDo
+	TKline1H         ITKline1HDo
+	TKline1Mo        ITKline1MoDo
+	TKline1W         ITKline1WDo
+	TKline1Y         ITKline1YDo
+	TKline30M        ITKline30MDo
+	TKline4H         ITKline4HDo
+	TKline5M         ITKline5MDo
+	TLiquidityModify ITLiquidityModifyDo
+	TTrade           ITTradeDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		TKline12H: q.TKline12H.WithContext(ctx),
-		TKline15M: q.TKline15M.WithContext(ctx),
-		TKline1D:  q.TKline1D.WithContext(ctx),
-		TKline1H:  q.TKline1H.WithContext(ctx),
-		TKline1Mo: q.TKline1Mo.WithContext(ctx),
-		TKline1W:  q.TKline1W.WithContext(ctx),
-		TKline1Y:  q.TKline1Y.WithContext(ctx),
-		TKline30M: q.TKline30M.WithContext(ctx),
-		TKline4H:  q.TKline4H.WithContext(ctx),
-		TKline5M:  q.TKline5M.WithContext(ctx),
-		TTrade:    q.TTrade.WithContext(ctx),
+		TKline12H:        q.TKline12H.WithContext(ctx),
+		TKline15M:        q.TKline15M.WithContext(ctx),
+		TKline1D:         q.TKline1D.WithContext(ctx),
+		TKline1H:         q.TKline1H.WithContext(ctx),
+		TKline1Mo:        q.TKline1Mo.WithContext(ctx),
+		TKline1W:         q.TKline1W.WithContext(ctx),
+		TKline1Y:         q.TKline1Y.WithContext(ctx),
+		TKline30M:        q.TKline30M.WithContext(ctx),
+		TKline4H:         q.TKline4H.WithContext(ctx),
+		TKline5M:         q.TKline5M.WithContext(ctx),
+		TLiquidityModify: q.TLiquidityModify.WithContext(ctx),
+		TTrade:           q.TTrade.WithContext(ctx),
 	}
 }
 

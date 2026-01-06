@@ -14,7 +14,6 @@ const TableNameTTrade = "t_trade"
 type TTrade struct {
 	Ts      time.Time `gorm:"column:ts;type:timestamp without time zone;not null" json:"ts"`
 	PoolID  int64     `gorm:"column:pool_id;type:bigint;not null" json:"pool_id,string"`
-	IsBuy   bool      `gorm:"column:is_buy;type:boolean;not null" json:"is_buy"`
 	Priceu  float64   `gorm:"column:priceu;type:double precision;not null" json:"priceu"`
 	Price01 float64   `gorm:"column:price01;type:double precision;not null" json:"price01"`
 	Amount0 float64   `gorm:"column:amount0;type:double precision;not null" json:"amount0"`

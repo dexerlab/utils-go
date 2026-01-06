@@ -33,6 +33,7 @@ func newTDexPool(db *gorm.DB, opts ...gen.DOOption) tDexPool {
 	_tDexPool.Version = field.NewString(tableName, "version")
 	_tDexPool.Icon = field.NewString(tableName, "icon")
 	_tDexPool.Website = field.NewString(tableName, "website")
+	_tDexPool.Factory = field.NewString(tableName, "factory")
 	_tDexPool.CreatedAt = field.NewTime(tableName, "created_at")
 	_tDexPool.UpdatedAt = field.NewTime(tableName, "updated_at")
 
@@ -51,6 +52,7 @@ type tDexPool struct {
 	Version   field.String
 	Icon      field.String
 	Website   field.String
+	Factory   field.String
 	CreatedAt field.Time
 	UpdatedAt field.Time
 
@@ -75,6 +77,7 @@ func (t *tDexPool) updateTableName(table string) *tDexPool {
 	t.Version = field.NewString(table, "version")
 	t.Icon = field.NewString(table, "icon")
 	t.Website = field.NewString(table, "website")
+	t.Factory = field.NewString(table, "factory")
 	t.CreatedAt = field.NewTime(table, "created_at")
 	t.UpdatedAt = field.NewTime(table, "updated_at")
 
@@ -101,13 +104,14 @@ func (t *tDexPool) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (t *tDexPool) fillFieldMap() {
-	t.fieldMap = make(map[string]field.Expr, 8)
+	t.fieldMap = make(map[string]field.Expr, 9)
 	t.fieldMap["id"] = t.ID
 	t.fieldMap["dex_id"] = t.DexID
 	t.fieldMap["name"] = t.Name
 	t.fieldMap["version"] = t.Version
 	t.fieldMap["icon"] = t.Icon
 	t.fieldMap["website"] = t.Website
+	t.fieldMap["factory"] = t.Factory
 	t.fieldMap["created_at"] = t.CreatedAt
 	t.fieldMap["updated_at"] = t.UpdatedAt
 }

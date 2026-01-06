@@ -29,7 +29,6 @@ func newTTrade(db *gorm.DB, opts ...gen.DOOption) tTrade {
 	_tTrade.ALL = field.NewAsterisk(tableName)
 	_tTrade.Ts = field.NewTime(tableName, "ts")
 	_tTrade.PoolID = field.NewInt64(tableName, "pool_id")
-	_tTrade.IsBuy = field.NewBool(tableName, "is_buy")
 	_tTrade.Priceu = field.NewFloat64(tableName, "priceu")
 	_tTrade.Price01 = field.NewFloat64(tableName, "price01")
 	_tTrade.Amount0 = field.NewFloat64(tableName, "amount0")
@@ -47,7 +46,6 @@ type tTrade struct {
 	ALL     field.Asterisk
 	Ts      field.Time
 	PoolID  field.Int64
-	IsBuy   field.Bool
 	Priceu  field.Float64
 	Price01 field.Float64
 	Amount0 field.Float64
@@ -71,7 +69,6 @@ func (t *tTrade) updateTableName(table string) *tTrade {
 	t.ALL = field.NewAsterisk(table)
 	t.Ts = field.NewTime(table, "ts")
 	t.PoolID = field.NewInt64(table, "pool_id")
-	t.IsBuy = field.NewBool(table, "is_buy")
 	t.Priceu = field.NewFloat64(table, "priceu")
 	t.Price01 = field.NewFloat64(table, "price01")
 	t.Amount0 = field.NewFloat64(table, "amount0")
@@ -101,10 +98,9 @@ func (t *tTrade) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (t *tTrade) fillFieldMap() {
-	t.fieldMap = make(map[string]field.Expr, 8)
+	t.fieldMap = make(map[string]field.Expr, 7)
 	t.fieldMap["ts"] = t.Ts
 	t.fieldMap["pool_id"] = t.PoolID
-	t.fieldMap["is_buy"] = t.IsBuy
 	t.fieldMap["priceu"] = t.Priceu
 	t.fieldMap["price01"] = t.Price01
 	t.fieldMap["amount0"] = t.Amount0

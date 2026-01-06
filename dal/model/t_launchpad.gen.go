@@ -15,6 +15,7 @@ type TLaunchpad struct {
 	ID        int32     `gorm:"column:id;type:int;primaryKey;autoIncrement:true" json:"id"`
 	Name      string    `gorm:"column:name;type:varchar(64);not null" json:"name"`
 	Version   string    `gorm:"column:version;type:varchar(64);not null" json:"version"`
+	Factory   string    `gorm:"column:factory;type:varchar(4095);not null" json:"factory"`
 	Icon      string    `gorm:"column:icon;type:varchar(2000);not null" json:"icon"`
 	Website   string    `gorm:"column:website;type:varchar(2000);not null" json:"website"`
 	CreatedAt time.Time `gorm:"column:created_at;type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
