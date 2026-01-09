@@ -18,9 +18,9 @@ type TTokenStatic struct {
 	Symbol            string          `gorm:"column:symbol;type:varchar(128);not null" json:"symbol"`
 	Decimals          int32           `gorm:"column:decimals;type:int;not null" json:"decimals"`
 	FullName          string          `gorm:"column:full_name;type:varchar(128);not null" json:"full_name"`
-	TotalSupply       decimal.Decimal `gorm:"column:total_supply;type:decimal(60,0);not null;default:0" json:"total_supply"`
 	CirculatingSupply decimal.Decimal `gorm:"column:circulating_supply;type:decimal(60,0);not null;default:0" json:"circulating_supply"`
-	DiscoverTimestamp time.Time       `gorm:"column:discover_timestamp;type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"discover_timestamp"`
+	TotalSupply       decimal.Decimal `gorm:"column:total_supply;type:decimal(60,0);not null;default:0" json:"total_supply"`
+	DiscoverAt        time.Time       `gorm:"column:discover_at;type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"discover_at"`
 	Icon              string          `gorm:"column:icon;type:varchar(1024);not null" json:"icon"`
 	Twitter           string          `gorm:"column:twitter;type:varchar(1024);not null" json:"twitter"`
 	Telegram          string          `gorm:"column:telegram;type:varchar(1024);not null" json:"telegram"`

@@ -5,6 +5,8 @@
 package model
 
 import (
+	"time"
+
 	"github.com/shopspring/decimal"
 )
 
@@ -17,7 +19,9 @@ type TPool struct {
 	Address    string          `gorm:"column:address;type:varchar(255);not null" json:"address"`
 	Liquidity0 decimal.Decimal `gorm:"column:liquidity0;type:decimal(60,0);not null" json:"liquidity0"`
 	Liquidity1 decimal.Decimal `gorm:"column:liquidity1;type:decimal(60,0);not null" json:"liquidity1"`
+	Liquidityu float64         `gorm:"column:liquidityu;type:double;not null" json:"liquidityu"`
 	Block      int64           `gorm:"column:block;type:bigint;not null" json:"block,string"`
+	UpdatedAt  time.Time       `gorm:"column:updated_at;type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
 
 // TableName TPool's table name

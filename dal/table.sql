@@ -348,19 +348,24 @@ CREATE TABLE t_pool (
   address VARCHAR(255) NOT NULL,
   liquidity0 DECIMAL(60, 0) NOT NULL,
   liquidity1 DECIMAL(60, 0) NOT NULL,
+  liquidityu DOUBLE NOT NULL,
   block BIGINT NOT NULL,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY `idx_address_chain_id` (`address`, `chain_id`)
-);
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE t_token (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   chain_id BIGINT NOT NULL,
   address VARCHAR(255) NOT NULL,
   priceu DOUBLE DEFAULT NULL,
+  best_pool_id BIGINT NOT NULL,
+  best_pool_vliq DOUBLE NOT NULL,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY `idx_address_chain_id` (`address`, `chain_id`)
-);
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
-CREATE TABLE t_token_stale (LIKE t_token INCLUDING ALL);
+CREATE TABLE t_token_stale LIKE t_token;
 
 CREATE TABLE t_pool_static (
   pool_id BIGINT PRIMARY KEY,
@@ -379,9 +384,9 @@ CREATE TABLE `t_token_static` (
   `symbol` varchar(128) NOT NULL,
   `decimals` int NOT NULL,
   `full_name` varchar(128) NOT NULL DEFAULT '',
-  `total_supply` decimal(60, 0) NOT NULL DEFAULT '0',
   `circulating_supply` decimal(60, 0) NOT NULL DEFAULT '0',
-  `discover_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `total_supply` decimal(60, 0) NOT NULL DEFAULT '0',
+  `discover_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `icon` varchar(1024) NOT NULL DEFAULT '',
   `twitter` varchar(1024) NOT NULL DEFAULT '',
   `telegram` varchar(1024) NOT NULL DEFAULT '',

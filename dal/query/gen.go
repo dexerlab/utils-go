@@ -32,6 +32,7 @@ var (
 	TTag                 *tTag
 	TToken               *tToken
 	TTokenInfo           *tTokenInfo
+	TTokenStale          *tTokenStale
 	TTokenStatic         *tTokenStatic
 	TTransfer            *tTransfer
 	TUserAccount         *tUserAccount
@@ -55,6 +56,7 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	TTag = &Q.TTag
 	TToken = &Q.TToken
 	TTokenInfo = &Q.TTokenInfo
+	TTokenStale = &Q.TTokenStale
 	TTokenStatic = &Q.TTokenStatic
 	TTransfer = &Q.TTransfer
 	TUserAccount = &Q.TUserAccount
@@ -79,6 +81,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		TTag:                 newTTag(db, opts...),
 		TToken:               newTToken(db, opts...),
 		TTokenInfo:           newTTokenInfo(db, opts...),
+		TTokenStale:          newTTokenStale(db, opts...),
 		TTokenStatic:         newTTokenStatic(db, opts...),
 		TTransfer:            newTTransfer(db, opts...),
 		TUserAccount:         newTUserAccount(db, opts...),
@@ -104,6 +107,7 @@ type Query struct {
 	TTag                 tTag
 	TToken               tToken
 	TTokenInfo           tTokenInfo
+	TTokenStale          tTokenStale
 	TTokenStatic         tTokenStatic
 	TTransfer            tTransfer
 	TUserAccount         tUserAccount
@@ -130,6 +134,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		TTag:                 q.TTag.clone(db),
 		TToken:               q.TToken.clone(db),
 		TTokenInfo:           q.TTokenInfo.clone(db),
+		TTokenStale:          q.TTokenStale.clone(db),
 		TTokenStatic:         q.TTokenStatic.clone(db),
 		TTransfer:            q.TTransfer.clone(db),
 		TUserAccount:         q.TUserAccount.clone(db),
@@ -163,6 +168,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		TTag:                 q.TTag.replaceDB(db),
 		TToken:               q.TToken.replaceDB(db),
 		TTokenInfo:           q.TTokenInfo.replaceDB(db),
+		TTokenStale:          q.TTokenStale.replaceDB(db),
 		TTokenStatic:         q.TTokenStatic.replaceDB(db),
 		TTransfer:            q.TTransfer.replaceDB(db),
 		TUserAccount:         q.TUserAccount.replaceDB(db),
@@ -186,6 +192,7 @@ type queryCtx struct {
 	TTag                 ITTagDo
 	TToken               ITTokenDo
 	TTokenInfo           ITTokenInfoDo
+	TTokenStale          ITTokenStaleDo
 	TTokenStatic         ITTokenStaticDo
 	TTransfer            ITTransferDo
 	TUserAccount         ITUserAccountDo
@@ -209,6 +216,7 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		TTag:                 q.TTag.WithContext(ctx),
 		TToken:               q.TToken.WithContext(ctx),
 		TTokenInfo:           q.TTokenInfo.WithContext(ctx),
+		TTokenStale:          q.TTokenStale.WithContext(ctx),
 		TTokenStatic:         q.TTokenStatic.WithContext(ctx),
 		TTransfer:            q.TTransfer.WithContext(ctx),
 		TUserAccount:         q.TUserAccount.WithContext(ctx),

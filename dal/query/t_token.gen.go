@@ -31,6 +31,9 @@ func newTToken(db *gorm.DB, opts ...gen.DOOption) tToken {
 	_tToken.ChainID = field.NewInt64(tableName, "chain_id")
 	_tToken.Address = field.NewString(tableName, "address")
 	_tToken.Priceu = field.NewFloat64(tableName, "priceu")
+	_tToken.BestPoolID = field.NewInt64(tableName, "best_pool_id")
+	_tToken.BestPoolVliq = field.NewFloat64(tableName, "best_pool_vliq")
+	_tToken.UpdatedAt = field.NewTime(tableName, "updated_at")
 
 	_tToken.fillFieldMap()
 
@@ -40,11 +43,14 @@ func newTToken(db *gorm.DB, opts ...gen.DOOption) tToken {
 type tToken struct {
 	tTokenDo tTokenDo
 
-	ALL     field.Asterisk
-	ID      field.Int64
-	ChainID field.Int64
-	Address field.String
-	Priceu  field.Float64
+	ALL          field.Asterisk
+	ID           field.Int64
+	ChainID      field.Int64
+	Address      field.String
+	Priceu       field.Float64
+	BestPoolID   field.Int64
+	BestPoolVliq field.Float64
+	UpdatedAt    field.Time
 
 	fieldMap map[string]field.Expr
 }
@@ -65,6 +71,9 @@ func (t *tToken) updateTableName(table string) *tToken {
 	t.ChainID = field.NewInt64(table, "chain_id")
 	t.Address = field.NewString(table, "address")
 	t.Priceu = field.NewFloat64(table, "priceu")
+	t.BestPoolID = field.NewInt64(table, "best_pool_id")
+	t.BestPoolVliq = field.NewFloat64(table, "best_pool_vliq")
+	t.UpdatedAt = field.NewTime(table, "updated_at")
 
 	t.fillFieldMap()
 
@@ -89,11 +98,14 @@ func (t *tToken) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (t *tToken) fillFieldMap() {
-	t.fieldMap = make(map[string]field.Expr, 4)
+	t.fieldMap = make(map[string]field.Expr, 7)
 	t.fieldMap["id"] = t.ID
 	t.fieldMap["chain_id"] = t.ChainID
 	t.fieldMap["address"] = t.Address
 	t.fieldMap["priceu"] = t.Priceu
+	t.fieldMap["best_pool_id"] = t.BestPoolID
+	t.fieldMap["best_pool_vliq"] = t.BestPoolVliq
+	t.fieldMap["updated_at"] = t.UpdatedAt
 }
 
 func (t tToken) clone(db *gorm.DB) tToken {

@@ -32,7 +32,9 @@ func newTPool(db *gorm.DB, opts ...gen.DOOption) tPool {
 	_tPool.Address = field.NewString(tableName, "address")
 	_tPool.Liquidity0 = field.NewField(tableName, "liquidity0")
 	_tPool.Liquidity1 = field.NewField(tableName, "liquidity1")
+	_tPool.Liquidityu = field.NewFloat64(tableName, "liquidityu")
 	_tPool.Block = field.NewInt64(tableName, "block")
+	_tPool.UpdatedAt = field.NewTime(tableName, "updated_at")
 
 	_tPool.fillFieldMap()
 
@@ -48,7 +50,9 @@ type tPool struct {
 	Address    field.String
 	Liquidity0 field.Field
 	Liquidity1 field.Field
+	Liquidityu field.Float64
 	Block      field.Int64
+	UpdatedAt  field.Time
 
 	fieldMap map[string]field.Expr
 }
@@ -70,7 +74,9 @@ func (t *tPool) updateTableName(table string) *tPool {
 	t.Address = field.NewString(table, "address")
 	t.Liquidity0 = field.NewField(table, "liquidity0")
 	t.Liquidity1 = field.NewField(table, "liquidity1")
+	t.Liquidityu = field.NewFloat64(table, "liquidityu")
 	t.Block = field.NewInt64(table, "block")
+	t.UpdatedAt = field.NewTime(table, "updated_at")
 
 	t.fillFieldMap()
 
@@ -95,13 +101,15 @@ func (t *tPool) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (t *tPool) fillFieldMap() {
-	t.fieldMap = make(map[string]field.Expr, 6)
+	t.fieldMap = make(map[string]field.Expr, 8)
 	t.fieldMap["id"] = t.ID
 	t.fieldMap["chain_id"] = t.ChainID
 	t.fieldMap["address"] = t.Address
 	t.fieldMap["liquidity0"] = t.Liquidity0
 	t.fieldMap["liquidity1"] = t.Liquidity1
+	t.fieldMap["liquidityu"] = t.Liquidityu
 	t.fieldMap["block"] = t.Block
+	t.fieldMap["updated_at"] = t.UpdatedAt
 }
 
 func (t tPool) clone(db *gorm.DB) tPool {

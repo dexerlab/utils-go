@@ -31,9 +31,9 @@ func newTTokenStatic(db *gorm.DB, opts ...gen.DOOption) tTokenStatic {
 	_tTokenStatic.Symbol = field.NewString(tableName, "symbol")
 	_tTokenStatic.Decimals = field.NewInt32(tableName, "decimals")
 	_tTokenStatic.FullName = field.NewString(tableName, "full_name")
-	_tTokenStatic.TotalSupply = field.NewField(tableName, "total_supply")
 	_tTokenStatic.CirculatingSupply = field.NewField(tableName, "circulating_supply")
-	_tTokenStatic.DiscoverTimestamp = field.NewTime(tableName, "discover_timestamp")
+	_tTokenStatic.TotalSupply = field.NewField(tableName, "total_supply")
+	_tTokenStatic.DiscoverAt = field.NewTime(tableName, "discover_at")
 	_tTokenStatic.Icon = field.NewString(tableName, "icon")
 	_tTokenStatic.Twitter = field.NewString(tableName, "twitter")
 	_tTokenStatic.Telegram = field.NewString(tableName, "telegram")
@@ -57,9 +57,9 @@ type tTokenStatic struct {
 	Symbol            field.String
 	Decimals          field.Int32
 	FullName          field.String
-	TotalSupply       field.Field
 	CirculatingSupply field.Field
-	DiscoverTimestamp field.Time
+	TotalSupply       field.Field
+	DiscoverAt        field.Time
 	Icon              field.String
 	Twitter           field.String
 	Telegram          field.String
@@ -89,9 +89,9 @@ func (t *tTokenStatic) updateTableName(table string) *tTokenStatic {
 	t.Symbol = field.NewString(table, "symbol")
 	t.Decimals = field.NewInt32(table, "decimals")
 	t.FullName = field.NewString(table, "full_name")
-	t.TotalSupply = field.NewField(table, "total_supply")
 	t.CirculatingSupply = field.NewField(table, "circulating_supply")
-	t.DiscoverTimestamp = field.NewTime(table, "discover_timestamp")
+	t.TotalSupply = field.NewField(table, "total_supply")
+	t.DiscoverAt = field.NewTime(table, "discover_at")
 	t.Icon = field.NewString(table, "icon")
 	t.Twitter = field.NewString(table, "twitter")
 	t.Telegram = field.NewString(table, "telegram")
@@ -134,9 +134,9 @@ func (t *tTokenStatic) fillFieldMap() {
 	t.fieldMap["symbol"] = t.Symbol
 	t.fieldMap["decimals"] = t.Decimals
 	t.fieldMap["full_name"] = t.FullName
-	t.fieldMap["total_supply"] = t.TotalSupply
 	t.fieldMap["circulating_supply"] = t.CirculatingSupply
-	t.fieldMap["discover_timestamp"] = t.DiscoverTimestamp
+	t.fieldMap["total_supply"] = t.TotalSupply
+	t.fieldMap["discover_at"] = t.DiscoverAt
 	t.fieldMap["icon"] = t.Icon
 	t.fieldMap["twitter"] = t.Twitter
 	t.fieldMap["telegram"] = t.Telegram
