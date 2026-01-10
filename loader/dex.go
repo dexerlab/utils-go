@@ -2,6 +2,7 @@ package loader
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -12,16 +13,22 @@ import (
 	"github.com/dexerlab/utils-go/util"
 	"github.com/dgraph-io/ristretto/v2"
 	"github.com/shopspring/decimal"
+	"gorm.io/gorm"
 )
 
 type TokenDyn struct {
-	priceu float64
+	id           int64
+	priceu       float64
+	bestPoolId   int64
+	bestPoolVliq float64
 }
 
 type PoolDyn struct {
+	id         int64
 	liquidity0 decimal.Decimal
 	liquidity1 decimal.Decimal
 	liquidityu float64
+	block      int64
 }
 
 // factory: 0x1..|0x2...|0x3...
@@ -72,30 +79,54 @@ func NewDexManager(alerter alert.Alerter) *DexManager {
 	}
 }
 
-func (mgr *DexManager) GetPoolDyn(chainid int64, address string) (PoolDyn, bool) {
+func (mgr *DexManager) SetPoolDyn(chainid int64, address string, dyn PoolDyn) {
+	keyAddr := util.NormalizeAddress(address)
+	key := fmt.Sprintf("%s|%d", keyAddr, chainid)
+	mgr.poolDyns.Set(key, dyn, 1)
+	//mgr.poolDyns.Wait()
+}
+
+func (mgr *DexManager) GetPoolDyn(chainid int64, address string, cache404 bool) (PoolDyn, bool) {
 
 	keyAddr := util.NormalizeAddress(address)
 
 	key := fmt.Sprintf("%s|%d", keyAddr, chainid)
 	if v, ok := mgr.poolDyns.Get(key); ok {
-		return v, true
+		if v.id < 0 {
+			return PoolDyn{}, false
+		} else {
+			return v, true
+		}
 	}
 
 	// not found in cache; load from DB via query
 	pn, err := query.TPool.WithContext(context.Background()).Where(query.TPool.Address.Eq(keyAddr), query.TPool.ChainID.Eq(chainid)).First()
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			if cache404 {
+				dyn := PoolDyn{id: -1}
+				mgr.poolDyns.Set(key, dyn, 1)
+			}
+		} else {
+			mgr.alerter.AlertText("DexManager.GetTokenDyn: query token failed", err)
+		}
 		return PoolDyn{}, false
 	}
 
-	dyn := PoolDyn{liquidity0: pn.Liquidity0, liquidity1: pn.Liquidity1, liquidityu: pn.Liquidityu}
+	dyn := PoolDyn{liquidity0: pn.Liquidity0, liquidity1: pn.Liquidity1, liquidityu: pn.Liquidityu, id: pn.ID, block: pn.Block}
 	mgr.poolDyns.Set(key, dyn, 1)
 	//mgr.poolDyns.Wait()
 
 	return dyn, true
 }
 
-func (mgr *DexManager) GetTokenPriceu(chainid int64, address string) (float64, bool) {
-	tknDyn, ok := mgr.GetTokenDyn(chainid, address)
+func (mgr *DexManager) GetTokenPriceu(chainid int64, chainName string, address string, cache404 bool) (float64, bool) {
+	ftkn, ok := mgr.GetFamousToken(chainName, address)
+	if ok && ftkn.IsStable {
+		return 1.0, true
+	}
+
+	tknDyn, ok := mgr.GetTokenDyn(chainid, address, cache404)
 	if !ok {
 		return 0, false
 	}
@@ -109,12 +140,66 @@ func (mgr *DexManager) SetTokenDyn(chainid int64, address string, dyn TokenDyn) 
 	//mgr.tokenDyns.Wait()
 }
 
-func (mgr *DexManager) SetTokenPriceu(chainid int64, address string, priceu float64) {
+func (mgr *DexManager) GetTokenDyn(chainid int64, address string, cache404 bool) (TokenDyn, bool) {
+
 	keyAddr := util.NormalizeAddress(address)
+
 	key := fmt.Sprintf("%s|%d", keyAddr, chainid)
-	dyn := TokenDyn{priceu: priceu}
+	if v, ok := mgr.tokenDyns.Get(key); ok {
+		if v.id < 0 {
+			return TokenDyn{}, false
+		} else {
+			return v, true
+		}
+	}
+
+	// not found in cache; load from DB via query
+	tkn, err := query.TToken.WithContext(context.Background()).Where(query.TToken.Address.Eq(keyAddr), query.TToken.ChainID.Eq(chainid)).First()
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			if cache404 {
+				dyn := TokenDyn{id: -1}
+				mgr.tokenDyns.Set(key, dyn, 1)
+			}
+		} else {
+			mgr.alerter.AlertText("DexManager.GetTokenDyn: query token failed", err)
+		}
+		return TokenDyn{}, false
+	}
+
+	dyn := TokenDyn{priceu: tkn.Priceu, id: tkn.ID}
 	mgr.tokenDyns.Set(key, dyn, 1)
 	//mgr.tokenDyns.Wait()
+
+	return dyn, true
+}
+
+func (mgr *DexManager) UpdatePoolLiqBatch(chainid int64, addrLiq0 map[string]decimal.Decimal, addrLiq1 map[string]decimal.Decimal,
+	addrLiqu map[string]float64, block int64) {
+
+	updates := make([]*model.TPool, 0, len(addrLiq0))
+	for addr := range addrLiq0 {
+		keyAddr := util.NormalizeAddress(addr)
+		liq0, ok0 := addrLiq0[addr]
+		liq1, ok1 := addrLiq1[addr]
+		liqu, oku := addrLiqu[addr]
+		if !ok0 || !ok1 || !oku {
+			continue
+		}
+		pool := &model.TPool{
+			Address:    keyAddr,
+			ChainID:    chainid,
+			Liquidity0: liq0,
+			Liquidity1: liq1,
+			Liquidityu: liqu,
+			Block:      block,
+		}
+		updates = append(updates, pool)
+	}
+
+	if err := query.TPool.WithContext(context.Background()).Save(updates...); err != nil {
+		mgr.alerter.AlertText("DexManager.UpdateDBPoolLiqBatch: save pool liquidity batch failed", err)
+	}
 }
 
 func (mgr *DexManager) UpdateTokenPriceuBatch(chainid int64, addrPriceu map[string]float64) {
@@ -123,38 +208,16 @@ func (mgr *DexManager) UpdateTokenPriceuBatch(chainid int64, addrPriceu map[stri
 	for addr, priceu := range addrPriceu {
 		keyAddr := util.NormalizeAddress(addr)
 		tkn := &model.TToken{
-			ChainID: chainid,
 			Address: keyAddr,
+			ChainID: chainid,
 			Priceu:  priceu,
 		}
 		updates = append(updates, tkn)
 	}
 
-	if err := query.TToken.WithContext(context.Background()).SaveAll(updates); err != nil {
+	if err := query.TToken.WithContext(context.Background()).Save(updates...); err != nil {
 		mgr.alerter.AlertText("DexManager.UpdateDBTokenPriceuBatch: save token priceu batch failed", err)
 	}
-}
-
-func (mgr *DexManager) GetTokenDyn(chainid int64, address string) (TokenDyn, bool) {
-
-	keyAddr := util.NormalizeAddress(address)
-
-	key := fmt.Sprintf("%s|%d", keyAddr, chainid)
-	if v, ok := mgr.tokenDyns.Get(key); ok {
-		return v, true
-	}
-
-	// not found in cache; load from DB via query
-	tkn, err := query.TToken.WithContext(context.Background()).Where(query.TToken.Address.Eq(keyAddr), query.TToken.ChainID.Eq(chainid)).First()
-	if err != nil {
-		return TokenDyn{}, false
-	}
-
-	dyn := TokenDyn{priceu: tkn.Priceu}
-	mgr.tokenDyns.Set(key, dyn, 1)
-	//mgr.tokenDyns.Wait()
-
-	return dyn, true
 }
 
 func (mgr *DexManager) GetDexPoolByID(id int64) (*model.TDexPool, bool) {
@@ -247,6 +310,16 @@ func (mgr *DexManager) GetFamousToken(chainName, address string) (*model.TFamous
 		return nil, false
 	}
 	return ft, true
+}
+
+func (mgr *DexManager) IsFamousStable(chainName, address string) bool {
+	ft, ok := mgr.GetFamousToken(chainName, address)
+	return ok && ft.IsStable
+}
+
+func (mgr *DexManager) IsFamousNative(chainName, address string) bool {
+	ft, ok := mgr.GetFamousToken(chainName, address)
+	return ok && ft.IsNative
 }
 
 func (mgr *DexManager) IsFamousToken(chainName, address string) bool {
