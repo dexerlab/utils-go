@@ -26,6 +26,7 @@ type PoolDyn struct {
 
 // factory: 0x1..|0x2...|0x3...
 type DexManager struct {
+	chainFamousTokens map[string]map[string]*model.TFamousToken // chainname -> address -> famous token
 	idDexs            map[int64]*model.TDex
 	idDexPools        map[int64]*model.TDexPool
 	idLaunchpads      map[int64]*model.TLaunchpad
@@ -91,6 +92,47 @@ func (mgr *DexManager) GetPoolDyn(chainid int64, address string) (PoolDyn, bool)
 	//mgr.poolDyns.Wait()
 
 	return dyn, true
+}
+
+func (mgr *DexManager) GetTokenPriceu(chainid int64, address string) (float64, bool) {
+	tknDyn, ok := mgr.GetTokenDyn(chainid, address)
+	if !ok {
+		return 0, false
+	}
+	return tknDyn.priceu, true
+}
+
+func (mgr *DexManager) SetTokenDyn(chainid int64, address string, dyn TokenDyn) {
+	keyAddr := util.NormalizeAddress(address)
+	key := fmt.Sprintf("%s|%d", keyAddr, chainid)
+	mgr.tokenDyns.Set(key, dyn, 1)
+	//mgr.tokenDyns.Wait()
+}
+
+func (mgr *DexManager) SetTokenPriceu(chainid int64, address string, priceu float64) {
+	keyAddr := util.NormalizeAddress(address)
+	key := fmt.Sprintf("%s|%d", keyAddr, chainid)
+	dyn := TokenDyn{priceu: priceu}
+	mgr.tokenDyns.Set(key, dyn, 1)
+	//mgr.tokenDyns.Wait()
+}
+
+func (mgr *DexManager) UpdateTokenPriceuBatch(chainid int64, addrPriceu map[string]float64) {
+
+	updates := make([]*model.TToken, 0, len(addrPriceu))
+	for addr, priceu := range addrPriceu {
+		keyAddr := util.NormalizeAddress(addr)
+		tkn := &model.TToken{
+			ChainID: chainid,
+			Address: keyAddr,
+			Priceu:  priceu,
+		}
+		updates = append(updates, tkn)
+	}
+
+	if err := query.TToken.WithContext(context.Background()).SaveAll(updates); err != nil {
+		mgr.alerter.AlertText("DexManager.UpdateDBTokenPriceuBatch: save token priceu batch failed", err)
+	}
 }
 
 func (mgr *DexManager) GetTokenDyn(chainid int64, address string) (TokenDyn, bool) {
@@ -191,6 +233,27 @@ func (mgr *DexManager) GetLaunchpadByFactory(factory string) (*model.TLaunchpad,
 	return lp, true
 }
 
+func (mgr *DexManager) GetFamousToken(chainName, address string) (*model.TFamousToken, bool) {
+	mgr.mutex.RLock()
+	defer mgr.mutex.RUnlock()
+	chainKey := util.NormalizeString(chainName)
+	addrKey := util.NormalizeAddress(address)
+	chainMap, ok := mgr.chainFamousTokens[chainKey]
+	if !ok {
+		return nil, false
+	}
+	ft, ok := chainMap[addrKey]
+	if !ok {
+		return nil, false
+	}
+	return ft, true
+}
+
+func (mgr *DexManager) IsFamousToken(chainName, address string) bool {
+	_, ok := mgr.GetFamousToken(chainName, address)
+	return ok
+}
+
 func (mgr *DexManager) LoadInfo() {
 
 	// temp maps
@@ -199,12 +262,11 @@ func (mgr *DexManager) LoadInfo() {
 	factoryLaunchpads := make(map[string]*model.TLaunchpad)
 	idDexPools := make(map[int64]*model.TDexPool)
 	idLaunchpads := make(map[int64]*model.TLaunchpad)
+	chainFamousToken := make(map[string]map[string]*model.TFamousToken)
 
 	// load t_dex
 	if dexList, err := query.TDex.WithContext(context.Background()).Find(); err != nil {
-		if mgr.alerter != nil {
-			mgr.alerter.AlertText("DexManager.LoadInfo: load t_dex failed", err)
-		}
+		mgr.alerter.AlertText("DexManager.LoadInfo: load t_dex failed", err)
 	} else {
 		for _, d := range dexList {
 			idDexs[int64(d.ID)] = d
@@ -213,9 +275,7 @@ func (mgr *DexManager) LoadInfo() {
 
 	// load t_dex_pool
 	if poolList, err := query.TDexPool.WithContext(context.Background()).Find(); err != nil {
-		if mgr.alerter != nil {
-			mgr.alerter.AlertText("DexManager.LoadInfo: load t_dex_pool failed", err)
-		}
+		mgr.alerter.AlertText("DexManager.LoadInfo: load t_dex_pool failed", err)
 	} else {
 		for _, p := range poolList {
 			idDexPools[int64(p.ID)] = p
@@ -234,9 +294,7 @@ func (mgr *DexManager) LoadInfo() {
 
 	// load t_launchpad
 	if lpList, err := query.TLaunchpad.WithContext(context.Background()).Find(); err != nil {
-		if mgr.alerter != nil {
-			mgr.alerter.AlertText("DexManager.LoadInfo: load t_launchpad failed", err)
-		}
+		mgr.alerter.AlertText("DexManager.LoadInfo: load t_launchpad failed", err)
 	} else {
 		for _, lp := range lpList {
 			idLaunchpads[int64(lp.ID)] = lp
@@ -253,7 +311,28 @@ func (mgr *DexManager) LoadInfo() {
 		}
 	}
 
+	// load t_famous_token
+	if ftList, err := query.TFamousToken.WithContext(context.Background()).Find(); err != nil {
+		mgr.alerter.AlertText("DexManager.LoadInfo: load t_famous_token failed", err)
+	} else {
+		for _, ft := range ftList {
+			chainName := util.NormalizeString(ft.ChainName)
+			if chainName == "" {
+				continue
+			}
+			addr := util.NormalizeAddress(ft.TokenAddress)
+			if addr == "" {
+				continue
+			}
+			if _, ok := chainFamousToken[chainName]; !ok {
+				chainFamousToken[chainName] = make(map[string]*model.TFamousToken)
+			}
+			chainFamousToken[chainName][addr] = ft
+		}
+	}
+
 	mgr.mutex.Lock()
+	mgr.chainFamousTokens = chainFamousToken
 	mgr.idDexs = idDexs
 	mgr.idDexPools = idDexPools
 	mgr.idLaunchpads = idLaunchpads
