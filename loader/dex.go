@@ -171,9 +171,13 @@ func (mgr *DexManager) SetPoolDynCache(id int64, dyn PoolDyn) {
 
 func (mgr *DexManager) GetPoolDyn(chainid int64, address string, cache bool, cache404 bool) (PoolDyn, bool) {
 
-	id, ok := mgr.GetIdByAddress(chainid, address, AddrTypePool, cache, cache404)
-	if !ok {
-		return PoolDyn{}, false
+	var id int64 = 0
+	if cache {
+		aid, ok := mgr.GetIdByAddress(chainid, address, AddrTypePool, cache, cache404)
+		if !ok {
+			return PoolDyn{}, false
+		}
+		id = aid
 	}
 
 	if cache {
@@ -229,9 +233,13 @@ func (mgr *DexManager) SetTokenDynCache(id int64, dyn TokenDyn) {
 
 func (mgr *DexManager) GetTokenDyn(chainid int64, address string, cache bool, cache404 bool) (TokenDyn, bool) {
 
-	id, ok := mgr.GetIdByAddress(chainid, address, AddrTypeToken, cache, cache404)
-	if !ok {
-		return TokenDyn{}, false
+	var id int64 = 0
+	if cache {
+		aid, ok := mgr.GetIdByAddress(chainid, address, AddrTypePool, cache, cache404)
+		if !ok {
+			return TokenDyn{}, false
+		}
+		id = aid
 	}
 
 	if cache {
