@@ -16,6 +16,14 @@ import (
 	"gorm.io/gorm"
 )
 
+type AddrType int
+
+const (
+	AddrTypeUnknown AddrType = iota
+	AddrTypeToken            // 1
+	AddrTypePool             // 2
+)
+
 type TokenDyn struct {
 	id           int64
 	decimal      int32
@@ -40,8 +48,9 @@ type DexManager struct {
 	idLaunchpads      map[int64]*model.TLaunchpad
 	factoryDexPools   map[string]*model.TDexPool
 	factoryLaunchpads map[string]*model.TLaunchpad
-	tokenDyns         *ristretto.Cache[string, TokenDyn] // address_chainid -> tokendyn
-	poolDyns          *ristretto.Cache[string, PoolDyn]  // address_chainid -> tokendyn
+	tokenDyns         *ristretto.Cache[int64, TokenDyn] // address_chainid -> tokendyn
+	addrIds           *ristretto.Cache[string, int64]   // address_chainid -> tokenid
+	poolDyns          *ristretto.Cache[int64, PoolDyn]  // address_chainid -> tokendyn
 	alerter           alert.Alerter
 
 	mutex *sync.RWMutex
@@ -49,7 +58,7 @@ type DexManager struct {
 
 func NewDexManager(alerter alert.Alerter) *DexManager {
 
-	tokenDyns, err := ristretto.NewCache(&ristretto.Config[string, TokenDyn]{
+	tokenDyns, err := ristretto.NewCache(&ristretto.Config[int64, TokenDyn]{
 		NumCounters: 1e8, // number of keys to track frequency of (10M).
 		MaxCost:     1e7,
 		BufferItems: 64, // number of keys per Get buffer.
@@ -58,10 +67,19 @@ func NewDexManager(alerter alert.Alerter) *DexManager {
 		panic(err)
 	}
 
-	poolDyns, err := ristretto.NewCache(&ristretto.Config[string, PoolDyn]{
+	poolDyns, err := ristretto.NewCache(&ristretto.Config[int64, PoolDyn]{
 		NumCounters: 1e8, // number of keys to track frequency of (10M).
 		MaxCost:     1e7, // maximum cost of cache (1GB).
 		BufferItems: 64,  // number of keys per Get buffer.
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	addrIds, err := ristretto.NewCache(&ristretto.Config[string, int64]{
+		NumCounters: 1e8, // number of keys to track frequency of (10M).
+		MaxCost:     1e7,
+		BufferItems: 64, // number of keys per Get buffer.
 	})
 	if err != nil {
 		panic(err)
@@ -74,40 +92,107 @@ func NewDexManager(alerter alert.Alerter) *DexManager {
 		factoryDexPools:   make(map[string]*model.TDexPool),
 		factoryLaunchpads: make(map[string]*model.TLaunchpad),
 		tokenDyns:         tokenDyns,
+		addrIds:           addrIds,
 		poolDyns:          poolDyns,
 		alerter:           alerter,
 		mutex:             &sync.RWMutex{},
 	}
 }
 
-func (mgr *DexManager) SetPoolDynCache(chainid int64, address string, dyn PoolDyn) {
+func (mgr *DexManager) SetIdByAddress(chainid int64, address string, id int64, addrType AddrType) {
 	keyAddr := util.NormalizeAddress(address)
 	key := fmt.Sprintf("%s|%d", keyAddr, chainid)
-	mgr.poolDyns.Set(key, dyn, 1)
-	//mgr.poolDyns.Wait()
+	mgr.addrIds.Set(key, id, 1)
+	//mgr.addrIds.Wait()
 }
 
-func (mgr *DexManager) GetPoolDyn(chainid int64, address string, cache bool, cache404 bool) (PoolDyn, bool) {
-
+func (mgr *DexManager) GetIdByAddress(chainid int64, address string, addrType AddrType, cache bool, cache404 bool) (int64, bool) {
 	keyAddr := util.NormalizeAddress(address)
 	key := fmt.Sprintf("%s|%d", keyAddr, chainid)
 
 	if cache {
-		if v, ok := mgr.poolDyns.Get(key); ok {
-			if v.id < 0 {
-				return PoolDyn{}, false
+		if v, ok := mgr.addrIds.Get(key); ok {
+			if v <= 0 {
+				return 0, false
 			} else {
 				return v, true
 			}
 		}
 	}
 	// not found in cache; load from DB via query
+	var id int64
+	var err error
+	switch addrType {
+	case AddrTypeToken:
+		s := query.TTokenDynamic
+		var tkn *model.TTokenDynamic
+		tkn, err = s.WithContext(context.Background()).
+			Select(s.ID).
+			Where(s.Address.Eq(keyAddr), s.ChainID.Eq(chainid)).First()
+		if err == nil {
+			id = tkn.ID
+		}
+	case AddrTypePool:
+		s := query.TPoolDynamic
+		var pool *model.TPoolDynamic
+		pool, err = s.WithContext(context.Background()).
+			Select(s.ID).
+			Where(s.Address.Eq(keyAddr), s.ChainID.Eq(chainid)).First()
+		if err == nil {
+			id = pool.ID
+		}
+	default:
+		return 0, false
+	}
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			if cache && cache404 {
+				mgr.addrIds.Set(key, -1, 1)
+			}
+		} else {
+			mgr.alerter.AlertText("DexManager.GetIdByAddress: query token failed", err)
+		}
+		return 0, false
+	}
+
+	if cache {
+		mgr.addrIds.Set(key, id, 1)
+		//mgr.addrIds.Wait()
+	}
+
+	return id, true
+}
+
+func (mgr *DexManager) SetPoolDynCache(id int64, dyn PoolDyn) {
+	mgr.poolDyns.Set(id, dyn, 1)
+	//mgr.poolDyns.Wait()
+}
+
+func (mgr *DexManager) GetPoolDyn(chainid int64, address string, cache bool, cache404 bool) (PoolDyn, bool) {
+
+	id, ok := mgr.GetIdByAddress(chainid, address, AddrTypePool, cache, cache404)
+	if !ok {
+		return PoolDyn{}, false
+	}
+
+	if cache {
+		if v, ok := mgr.poolDyns.Get(id); ok {
+			if v.id <= 0 {
+				return PoolDyn{}, false
+			} else {
+				return v, true
+			}
+		}
+	}
+	keyAddr := util.NormalizeAddress(address)
+	// not found in cache; load from DB via query
 	pn, err := query.TPoolDynamic.WithContext(context.Background()).Where(query.TPoolDynamic.Address.Eq(keyAddr), query.TPoolDynamic.ChainID.Eq(chainid)).First()
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			if cache && cache404 {
 				dyn := PoolDyn{id: -1}
-				mgr.poolDyns.Set(key, dyn, 1)
+				mgr.poolDyns.Set(id, dyn, 1)
 			}
 		} else {
 			mgr.alerter.AlertText("DexManager.GetTokenDyn: query token failed", err)
@@ -118,7 +203,7 @@ func (mgr *DexManager) GetPoolDyn(chainid int64, address string, cache bool, cac
 	dyn := PoolDyn{liquidity0: pn.Liquidity0, liquidity1: pn.Liquidity1, liquidityu: pn.Liquidityu, id: pn.ID, block: pn.Block}
 
 	if cache {
-		mgr.poolDyns.Set(key, dyn, 1)
+		mgr.poolDyns.Set(id, dyn, 1)
 		//mgr.poolDyns.Wait()
 	}
 	return dyn, true
@@ -137,21 +222,21 @@ func (mgr *DexManager) GetTokenPriceu(chainid int64, chainName string, address s
 	return tknDyn.priceu, true
 }
 
-func (mgr *DexManager) SetTokenDynCache(chainid int64, address string, dyn TokenDyn) {
-	keyAddr := util.NormalizeAddress(address)
-	key := fmt.Sprintf("%s|%d", keyAddr, chainid)
-	mgr.tokenDyns.Set(key, dyn, 1)
+func (mgr *DexManager) SetTokenDynCache(id int64, dyn TokenDyn) {
+	mgr.tokenDyns.Set(id, dyn, 1)
 	//mgr.tokenDyns.Wait()
 }
 
 func (mgr *DexManager) GetTokenDyn(chainid int64, address string, cache bool, cache404 bool) (TokenDyn, bool) {
 
-	keyAddr := util.NormalizeAddress(address)
-	key := fmt.Sprintf("%s|%d", keyAddr, chainid)
+	id, ok := mgr.GetIdByAddress(chainid, address, AddrTypeToken, cache, cache404)
+	if !ok {
+		return TokenDyn{}, false
+	}
 
 	if cache {
-		if v, ok := mgr.tokenDyns.Get(key); ok {
-			if v.id < 0 {
+		if v, ok := mgr.tokenDyns.Get(id); ok {
+			if v.id <= 0 {
 				return TokenDyn{}, false
 			} else {
 				return v, true
@@ -161,6 +246,7 @@ func (mgr *DexManager) GetTokenDyn(chainid int64, address string, cache bool, ca
 
 	d := query.TTokenDynamic
 	s := query.TTokenStatic
+	keyAddr := util.NormalizeAddress(address)
 	// not found in cache; load from DB via query
 	tkn, err := d.WithContext(context.Background()).
 		Select(d.ALL, s.Decimals).
@@ -171,7 +257,7 @@ func (mgr *DexManager) GetTokenDyn(chainid int64, address string, cache bool, ca
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			if cache && cache404 {
 				dyn := TokenDyn{id: -1}
-				mgr.tokenDyns.Set(key, dyn, 1)
+				mgr.tokenDyns.Set(id, dyn, 1)
 			}
 		} else {
 			mgr.alerter.AlertText("DexManager.GetTokenDyn: query token failed", err)
@@ -181,7 +267,7 @@ func (mgr *DexManager) GetTokenDyn(chainid int64, address string, cache bool, ca
 
 	dyn := TokenDyn{priceu: tkn.Priceu, id: tkn.ID}
 	if cache {
-		mgr.tokenDyns.Set(key, dyn, 1)
+		mgr.tokenDyns.Set(id, dyn, 1)
 		//mgr.tokenDyns.Wait()
 	}
 
