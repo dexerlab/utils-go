@@ -18,6 +18,7 @@ import (
 
 type TokenDyn struct {
 	id           int64
+	decimal      int32
 	priceu       float64
 	bestPoolId   int64
 	bestPoolVliq float64
@@ -79,31 +80,32 @@ func NewDexManager(alerter alert.Alerter) *DexManager {
 	}
 }
 
-func (mgr *DexManager) SetPoolDyn(chainid int64, address string, dyn PoolDyn) {
+func (mgr *DexManager) SetPoolDynCache(chainid int64, address string, dyn PoolDyn) {
 	keyAddr := util.NormalizeAddress(address)
 	key := fmt.Sprintf("%s|%d", keyAddr, chainid)
 	mgr.poolDyns.Set(key, dyn, 1)
 	//mgr.poolDyns.Wait()
 }
 
-func (mgr *DexManager) GetPoolDyn(chainid int64, address string, cache404 bool) (PoolDyn, bool) {
+func (mgr *DexManager) GetPoolDyn(chainid int64, address string, cache bool, cache404 bool) (PoolDyn, bool) {
 
 	keyAddr := util.NormalizeAddress(address)
-
 	key := fmt.Sprintf("%s|%d", keyAddr, chainid)
-	if v, ok := mgr.poolDyns.Get(key); ok {
-		if v.id < 0 {
-			return PoolDyn{}, false
-		} else {
-			return v, true
+
+	if cache {
+		if v, ok := mgr.poolDyns.Get(key); ok {
+			if v.id < 0 {
+				return PoolDyn{}, false
+			} else {
+				return v, true
+			}
 		}
 	}
-
 	// not found in cache; load from DB via query
-	pn, err := query.TPool.WithContext(context.Background()).Where(query.TPool.Address.Eq(keyAddr), query.TPool.ChainID.Eq(chainid)).First()
+	pn, err := query.TPoolDynamic.WithContext(context.Background()).Where(query.TPoolDynamic.Address.Eq(keyAddr), query.TPoolDynamic.ChainID.Eq(chainid)).First()
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			if cache404 {
+			if cache && cache404 {
 				dyn := PoolDyn{id: -1}
 				mgr.poolDyns.Set(key, dyn, 1)
 			}
@@ -114,50 +116,60 @@ func (mgr *DexManager) GetPoolDyn(chainid int64, address string, cache404 bool) 
 	}
 
 	dyn := PoolDyn{liquidity0: pn.Liquidity0, liquidity1: pn.Liquidity1, liquidityu: pn.Liquidityu, id: pn.ID, block: pn.Block}
-	mgr.poolDyns.Set(key, dyn, 1)
-	//mgr.poolDyns.Wait()
 
+	if cache {
+		mgr.poolDyns.Set(key, dyn, 1)
+		//mgr.poolDyns.Wait()
+	}
 	return dyn, true
 }
 
-func (mgr *DexManager) GetTokenPriceu(chainid int64, chainName string, address string, cache404 bool) (float64, bool) {
+func (mgr *DexManager) GetTokenPriceu(chainid int64, chainName string, address string, cache bool, cache404 bool) (float64, bool) {
 	ftkn, ok := mgr.GetFamousToken(chainName, address)
 	if ok && ftkn.IsStable {
 		return 1.0, true
 	}
 
-	tknDyn, ok := mgr.GetTokenDyn(chainid, address, cache404)
+	tknDyn, ok := mgr.GetTokenDyn(chainid, address, cache, cache404)
 	if !ok {
 		return 0, false
 	}
 	return tknDyn.priceu, true
 }
 
-func (mgr *DexManager) SetTokenDyn(chainid int64, address string, dyn TokenDyn) {
+func (mgr *DexManager) SetTokenDynCache(chainid int64, address string, dyn TokenDyn) {
 	keyAddr := util.NormalizeAddress(address)
 	key := fmt.Sprintf("%s|%d", keyAddr, chainid)
 	mgr.tokenDyns.Set(key, dyn, 1)
 	//mgr.tokenDyns.Wait()
 }
 
-func (mgr *DexManager) GetTokenDyn(chainid int64, address string, cache404 bool) (TokenDyn, bool) {
+func (mgr *DexManager) GetTokenDyn(chainid int64, address string, cache bool, cache404 bool) (TokenDyn, bool) {
 
 	keyAddr := util.NormalizeAddress(address)
-
 	key := fmt.Sprintf("%s|%d", keyAddr, chainid)
-	if v, ok := mgr.tokenDyns.Get(key); ok {
-		if v.id < 0 {
-			return TokenDyn{}, false
-		} else {
-			return v, true
+
+	if cache {
+		if v, ok := mgr.tokenDyns.Get(key); ok {
+			if v.id < 0 {
+				return TokenDyn{}, false
+			} else {
+				return v, true
+			}
 		}
 	}
 
+	d := query.TTokenDynamic
+	s := query.TTokenStatic
 	// not found in cache; load from DB via query
-	tkn, err := query.TToken.WithContext(context.Background()).Where(query.TToken.Address.Eq(keyAddr), query.TToken.ChainID.Eq(chainid)).First()
+	tkn, err := d.WithContext(context.Background()).
+		Select(d.ALL, s.Decimals).
+		LeftJoin(s, s.TokenID.EqCol(d.ID)).
+		Where(d.Address.Eq(keyAddr), d.ChainID.Eq(chainid)).First()
+
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			if cache404 {
+			if cache && cache404 {
 				dyn := TokenDyn{id: -1}
 				mgr.tokenDyns.Set(key, dyn, 1)
 			}
@@ -168,16 +180,18 @@ func (mgr *DexManager) GetTokenDyn(chainid int64, address string, cache404 bool)
 	}
 
 	dyn := TokenDyn{priceu: tkn.Priceu, id: tkn.ID}
-	mgr.tokenDyns.Set(key, dyn, 1)
-	//mgr.tokenDyns.Wait()
+	if cache {
+		mgr.tokenDyns.Set(key, dyn, 1)
+		//mgr.tokenDyns.Wait()
+	}
 
 	return dyn, true
 }
 
-func (mgr *DexManager) UpdatePoolLiqBatch(chainid int64, addrLiq0 map[string]decimal.Decimal, addrLiq1 map[string]decimal.Decimal,
+func (mgr *DexManager) DbUpdatePoolLiqBatch(chainid int64, addrLiq0 map[string]decimal.Decimal, addrLiq1 map[string]decimal.Decimal,
 	addrLiqu map[string]float64, block int64) {
 
-	updates := make([]*model.TPool, 0, len(addrLiq0))
+	updates := make([]*model.TPoolDynamic, 0, len(addrLiq0))
 	for addr := range addrLiq0 {
 		keyAddr := util.NormalizeAddress(addr)
 		liq0, ok0 := addrLiq0[addr]
@@ -186,7 +200,7 @@ func (mgr *DexManager) UpdatePoolLiqBatch(chainid int64, addrLiq0 map[string]dec
 		if !ok0 || !ok1 || !oku {
 			continue
 		}
-		pool := &model.TPool{
+		pool := &model.TPoolDynamic{
 			Address:    keyAddr,
 			ChainID:    chainid,
 			Liquidity0: liq0,
@@ -197,17 +211,17 @@ func (mgr *DexManager) UpdatePoolLiqBatch(chainid int64, addrLiq0 map[string]dec
 		updates = append(updates, pool)
 	}
 
-	if err := query.TPool.WithContext(context.Background()).Save(updates...); err != nil {
+	if err := query.TPoolDynamic.WithContext(context.Background()).Save(updates...); err != nil {
 		mgr.alerter.AlertText("DexManager.UpdateDBPoolLiqBatch: save pool liquidity batch failed", err)
 	}
 }
 
-func (mgr *DexManager) UpdateTokenPriceuBatch(chainid int64, addrPriceu map[string]float64) {
+func (mgr *DexManager) DbUpdateTokenPriceuBatch(chainid int64, addrPriceu map[string]float64) {
 
-	updates := make([]*model.TToken, 0, len(addrPriceu))
+	updates := make([]*model.TTokenDynamic, 0, len(addrPriceu))
 	for addr, priceu := range addrPriceu {
 		keyAddr := util.NormalizeAddress(addr)
-		tkn := &model.TToken{
+		tkn := &model.TTokenDynamic{
 			Address: keyAddr,
 			ChainID: chainid,
 			Priceu:  priceu,
@@ -215,7 +229,7 @@ func (mgr *DexManager) UpdateTokenPriceuBatch(chainid int64, addrPriceu map[stri
 		updates = append(updates, tkn)
 	}
 
-	if err := query.TToken.WithContext(context.Background()).Save(updates...); err != nil {
+	if err := query.TTokenDynamic.WithContext(context.Background()).Save(updates...); err != nil {
 		mgr.alerter.AlertText("DexManager.UpdateDBTokenPriceuBatch: save token priceu batch failed", err)
 	}
 }

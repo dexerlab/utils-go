@@ -8,10 +8,10 @@ import (
 	"time"
 )
 
-const TableNameTToken = "t_token"
+const TableNameTTokenDynamic = "t_token_dynamic"
 
-// TToken mapped from table <t_token>
-type TToken struct {
+// TTokenDynamic mapped from table <t_token_dynamic>
+type TTokenDynamic struct {
 	ID           int64     `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true" json:"id,string"`
 	ChainID      int64     `gorm:"column:chain_id;type:bigint;not null" json:"chain_id,string"`
 	Address      string    `gorm:"column:address;type:varchar(255);not null" json:"address"`
@@ -21,7 +21,7 @@ type TToken struct {
 	UpdatedAt    time.Time `gorm:"column:updated_at;type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
 
-// TableName TToken's table name
-func (*TToken) TableName() string {
-	return TableNameTToken
+// TableName TTokenDynamic's table name
+func (*TTokenDynamic) TableName() string {
+	return TableNameTTokenDynamic
 }

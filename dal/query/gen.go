@@ -27,12 +27,12 @@ var (
 	TLaunchpad           *tLaunchpad
 	TNodeInfo            *tNodeInfo
 	TObjectTag           *tObjectTag
-	TPool                *tPool
+	TPoolDynamic         *tPoolDynamic
 	TPoolStatic          *tPoolStatic
 	TTag                 *tTag
-	TToken               *tToken
+	TTokenDynamic        *tTokenDynamic
+	TTokenDynamicStale   *tTokenDynamicStale
 	TTokenInfo           *tTokenInfo
-	TTokenStale          *tTokenStale
 	TTokenStatic         *tTokenStatic
 	TTransfer            *tTransfer
 	TUserAccount         *tUserAccount
@@ -51,12 +51,12 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	TLaunchpad = &Q.TLaunchpad
 	TNodeInfo = &Q.TNodeInfo
 	TObjectTag = &Q.TObjectTag
-	TPool = &Q.TPool
+	TPoolDynamic = &Q.TPoolDynamic
 	TPoolStatic = &Q.TPoolStatic
 	TTag = &Q.TTag
-	TToken = &Q.TToken
+	TTokenDynamic = &Q.TTokenDynamic
+	TTokenDynamicStale = &Q.TTokenDynamicStale
 	TTokenInfo = &Q.TTokenInfo
-	TTokenStale = &Q.TTokenStale
 	TTokenStatic = &Q.TTokenStatic
 	TTransfer = &Q.TTransfer
 	TUserAccount = &Q.TUserAccount
@@ -76,12 +76,12 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		TLaunchpad:           newTLaunchpad(db, opts...),
 		TNodeInfo:            newTNodeInfo(db, opts...),
 		TObjectTag:           newTObjectTag(db, opts...),
-		TPool:                newTPool(db, opts...),
+		TPoolDynamic:         newTPoolDynamic(db, opts...),
 		TPoolStatic:          newTPoolStatic(db, opts...),
 		TTag:                 newTTag(db, opts...),
-		TToken:               newTToken(db, opts...),
+		TTokenDynamic:        newTTokenDynamic(db, opts...),
+		TTokenDynamicStale:   newTTokenDynamicStale(db, opts...),
 		TTokenInfo:           newTTokenInfo(db, opts...),
-		TTokenStale:          newTTokenStale(db, opts...),
 		TTokenStatic:         newTTokenStatic(db, opts...),
 		TTransfer:            newTTransfer(db, opts...),
 		TUserAccount:         newTUserAccount(db, opts...),
@@ -102,12 +102,12 @@ type Query struct {
 	TLaunchpad           tLaunchpad
 	TNodeInfo            tNodeInfo
 	TObjectTag           tObjectTag
-	TPool                tPool
+	TPoolDynamic         tPoolDynamic
 	TPoolStatic          tPoolStatic
 	TTag                 tTag
-	TToken               tToken
+	TTokenDynamic        tTokenDynamic
+	TTokenDynamicStale   tTokenDynamicStale
 	TTokenInfo           tTokenInfo
-	TTokenStale          tTokenStale
 	TTokenStatic         tTokenStatic
 	TTransfer            tTransfer
 	TUserAccount         tUserAccount
@@ -129,12 +129,12 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		TLaunchpad:           q.TLaunchpad.clone(db),
 		TNodeInfo:            q.TNodeInfo.clone(db),
 		TObjectTag:           q.TObjectTag.clone(db),
-		TPool:                q.TPool.clone(db),
+		TPoolDynamic:         q.TPoolDynamic.clone(db),
 		TPoolStatic:          q.TPoolStatic.clone(db),
 		TTag:                 q.TTag.clone(db),
-		TToken:               q.TToken.clone(db),
+		TTokenDynamic:        q.TTokenDynamic.clone(db),
+		TTokenDynamicStale:   q.TTokenDynamicStale.clone(db),
 		TTokenInfo:           q.TTokenInfo.clone(db),
-		TTokenStale:          q.TTokenStale.clone(db),
 		TTokenStatic:         q.TTokenStatic.clone(db),
 		TTransfer:            q.TTransfer.clone(db),
 		TUserAccount:         q.TUserAccount.clone(db),
@@ -163,12 +163,12 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		TLaunchpad:           q.TLaunchpad.replaceDB(db),
 		TNodeInfo:            q.TNodeInfo.replaceDB(db),
 		TObjectTag:           q.TObjectTag.replaceDB(db),
-		TPool:                q.TPool.replaceDB(db),
+		TPoolDynamic:         q.TPoolDynamic.replaceDB(db),
 		TPoolStatic:          q.TPoolStatic.replaceDB(db),
 		TTag:                 q.TTag.replaceDB(db),
-		TToken:               q.TToken.replaceDB(db),
+		TTokenDynamic:        q.TTokenDynamic.replaceDB(db),
+		TTokenDynamicStale:   q.TTokenDynamicStale.replaceDB(db),
 		TTokenInfo:           q.TTokenInfo.replaceDB(db),
-		TTokenStale:          q.TTokenStale.replaceDB(db),
 		TTokenStatic:         q.TTokenStatic.replaceDB(db),
 		TTransfer:            q.TTransfer.replaceDB(db),
 		TUserAccount:         q.TUserAccount.replaceDB(db),
@@ -187,12 +187,12 @@ type queryCtx struct {
 	TLaunchpad           ITLaunchpadDo
 	TNodeInfo            ITNodeInfoDo
 	TObjectTag           ITObjectTagDo
-	TPool                ITPoolDo
+	TPoolDynamic         ITPoolDynamicDo
 	TPoolStatic          ITPoolStaticDo
 	TTag                 ITTagDo
-	TToken               ITTokenDo
+	TTokenDynamic        ITTokenDynamicDo
+	TTokenDynamicStale   ITTokenDynamicStaleDo
 	TTokenInfo           ITTokenInfoDo
-	TTokenStale          ITTokenStaleDo
 	TTokenStatic         ITTokenStaticDo
 	TTransfer            ITTransferDo
 	TUserAccount         ITUserAccountDo
@@ -211,12 +211,12 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		TLaunchpad:           q.TLaunchpad.WithContext(ctx),
 		TNodeInfo:            q.TNodeInfo.WithContext(ctx),
 		TObjectTag:           q.TObjectTag.WithContext(ctx),
-		TPool:                q.TPool.WithContext(ctx),
+		TPoolDynamic:         q.TPoolDynamic.WithContext(ctx),
 		TPoolStatic:          q.TPoolStatic.WithContext(ctx),
 		TTag:                 q.TTag.WithContext(ctx),
-		TToken:               q.TToken.WithContext(ctx),
+		TTokenDynamic:        q.TTokenDynamic.WithContext(ctx),
+		TTokenDynamicStale:   q.TTokenDynamicStale.WithContext(ctx),
 		TTokenInfo:           q.TTokenInfo.WithContext(ctx),
-		TTokenStale:          q.TTokenStale.WithContext(ctx),
 		TTokenStatic:         q.TTokenStatic.WithContext(ctx),
 		TTransfer:            q.TTransfer.WithContext(ctx),
 		TUserAccount:         q.TUserAccount.WithContext(ctx),

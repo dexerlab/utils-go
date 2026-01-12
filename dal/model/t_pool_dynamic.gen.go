@@ -10,10 +10,10 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-const TableNameTPool = "t_pool"
+const TableNameTPoolDynamic = "t_pool_dynamic"
 
-// TPool mapped from table <t_pool>
-type TPool struct {
+// TPoolDynamic mapped from table <t_pool_dynamic>
+type TPoolDynamic struct {
 	ID         int64           `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true" json:"id,string"`
 	ChainID    int64           `gorm:"column:chain_id;type:bigint;not null" json:"chain_id,string"`
 	Address    string          `gorm:"column:address;type:varchar(255);not null" json:"address"`
@@ -24,7 +24,7 @@ type TPool struct {
 	UpdatedAt  time.Time       `gorm:"column:updated_at;type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
 
-// TableName TPool's table name
-func (*TPool) TableName() string {
-	return TableNameTPool
+// TableName TPoolDynamic's table name
+func (*TPoolDynamic) TableName() string {
+	return TableNameTPoolDynamic
 }

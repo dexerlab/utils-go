@@ -342,7 +342,7 @@ CREATE TABLE t_kline_1mo (LIKE t_kline_5m INCLUDING ALL);
 
 CREATE TABLE t_kline_1y (LIKE t_kline_5m INCLUDING ALL);
 
-CREATE TABLE t_pool (
+CREATE TABLE t_pool_dynamic (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   chain_id BIGINT NOT NULL,
   address VARCHAR(255) NOT NULL,
@@ -354,7 +354,7 @@ CREATE TABLE t_pool (
   UNIQUE KEY `idx_address_chain_id` (`address`, `chain_id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
-CREATE TABLE t_token (
+CREATE TABLE t_token_dynamic (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   chain_id BIGINT NOT NULL,
   address VARCHAR(255) NOT NULL,
@@ -365,7 +365,7 @@ CREATE TABLE t_token (
   UNIQUE KEY `idx_address_chain_id` (`address`, `chain_id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
-CREATE TABLE t_token_stale LIKE t_token;
+CREATE TABLE t_token_dynamic_stale LIKE t_token_dynamic;
 
 CREATE TABLE t_pool_static (
   pool_id BIGINT PRIMARY KEY,
