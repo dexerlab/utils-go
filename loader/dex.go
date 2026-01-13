@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"sync"
 
 	"github.com/dexerlab/utils-go/alert"
 	"github.com/dexerlab/utils-go/dal/model"
@@ -14,6 +13,7 @@ import (
 	"github.com/dgraph-io/ristretto/v2"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type AddrType int
@@ -25,19 +25,21 @@ const (
 )
 
 type TokenDyn struct {
-	id           int64
-	decimal      int32
-	priceu       float64
-	bestPoolId   int64
-	bestPoolVliq float64
+	ID           int64
+	Priceu       float64
+	BestPoolId   int64
+	BestPoolVliq float64
+	Decimals     int32
 }
 
 type PoolDyn struct {
-	id         int64
-	liquidity0 decimal.Decimal
-	liquidity1 decimal.Decimal
-	liquidityu float64
-	block      int64
+	ID         int64
+	Liquidity0 decimal.Decimal
+	Liquidity1 decimal.Decimal
+	Liquidityu float64
+	Block      int64
+	Token0ID   int64
+	Token1ID   int64
 }
 
 // factory: 0x1..|0x2...|0x3...
@@ -52,8 +54,6 @@ type DexManager struct {
 	addrIds           *ristretto.Cache[string, int64]   // address_chainid -> tokenid
 	poolDyns          *ristretto.Cache[int64, PoolDyn]  // address_chainid -> tokendyn
 	alerter           alert.Alerter
-
-	mutex *sync.RWMutex
 }
 
 func NewDexManager(alerter alert.Alerter) *DexManager {
@@ -95,7 +95,6 @@ func NewDexManager(alerter alert.Alerter) *DexManager {
 		addrIds:           addrIds,
 		poolDyns:          poolDyns,
 		alerter:           alerter,
-		mutex:             &sync.RWMutex{},
 	}
 }
 
@@ -182,7 +181,7 @@ func (mgr *DexManager) GetPoolDyn(chainid int64, address string, cache bool, cac
 
 	if cache {
 		if v, ok := mgr.poolDyns.Get(id); ok {
-			if v.id <= 0 {
+			if v.ID <= 0 {
 				return PoolDyn{}, false
 			} else {
 				return v, true
@@ -190,12 +189,20 @@ func (mgr *DexManager) GetPoolDyn(chainid int64, address string, cache bool, cac
 		}
 	}
 	keyAddr := util.NormalizeAddress(address)
-	// not found in cache; load from DB via query
-	pn, err := query.TPoolDynamic.WithContext(context.Background()).Where(query.TPoolDynamic.Address.Eq(keyAddr), query.TPoolDynamic.ChainID.Eq(chainid)).First()
+
+	d := query.TPoolDynamic
+	s := query.TPoolStatic
+
+	var dyn PoolDyn
+	err := d.WithContext(context.Background()).
+		Select(d.ID, d.Liquidity0, d.Liquidity1, d.Liquidityu, d.Block, s.Token0ID, s.Token1ID).
+		LeftJoin(s, s.PoolID.EqCol(d.ID)).
+		Where(d.Address.Eq(keyAddr), d.ChainID.Eq(chainid)).Scan(&dyn)
+
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			if cache && cache404 {
-				dyn := PoolDyn{id: -1}
+				dyn := PoolDyn{ID: -1}
 				mgr.poolDyns.Set(id, dyn, 1)
 			}
 		} else {
@@ -203,8 +210,6 @@ func (mgr *DexManager) GetPoolDyn(chainid int64, address string, cache bool, cac
 		}
 		return PoolDyn{}, false
 	}
-
-	dyn := PoolDyn{liquidity0: pn.Liquidity0, liquidity1: pn.Liquidity1, liquidityu: pn.Liquidityu, id: pn.ID, block: pn.Block}
 
 	if cache {
 		mgr.poolDyns.Set(id, dyn, 1)
@@ -223,7 +228,7 @@ func (mgr *DexManager) GetTokenPriceu(chainid int64, chainName string, address s
 	if !ok {
 		return 0, false
 	}
-	return tknDyn.priceu, true
+	return tknDyn.Priceu, true
 }
 
 func (mgr *DexManager) SetTokenDynCache(id int64, dyn TokenDyn) {
@@ -244,7 +249,7 @@ func (mgr *DexManager) GetTokenDyn(chainid int64, address string, cache bool, ca
 
 	if cache {
 		if v, ok := mgr.tokenDyns.Get(id); ok {
-			if v.id <= 0 {
+			if v.ID <= 0 {
 				return TokenDyn{}, false
 			} else {
 				return v, true
@@ -256,15 +261,16 @@ func (mgr *DexManager) GetTokenDyn(chainid int64, address string, cache bool, ca
 	s := query.TTokenStatic
 	keyAddr := util.NormalizeAddress(address)
 	// not found in cache; load from DB via query
-	tkn, err := d.WithContext(context.Background()).
-		Select(d.ALL, s.Decimals).
+	var dyn TokenDyn
+	err := d.WithContext(context.Background()).
+		Select(d.ID, d.Priceu, d.BestPoolID, d.BestPoolVliq, s.Decimals).
 		LeftJoin(s, s.TokenID.EqCol(d.ID)).
-		Where(d.Address.Eq(keyAddr), d.ChainID.Eq(chainid)).First()
+		Where(d.Address.Eq(keyAddr), d.ChainID.Eq(chainid)).Scan(&dyn)
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			if cache && cache404 {
-				dyn := TokenDyn{id: -1}
+				dyn := TokenDyn{ID: -1}
 				mgr.tokenDyns.Set(id, dyn, 1)
 			}
 		} else {
@@ -273,7 +279,6 @@ func (mgr *DexManager) GetTokenDyn(chainid int64, address string, cache bool, ca
 		return TokenDyn{}, false
 	}
 
-	dyn := TokenDyn{priceu: tkn.Priceu, id: tkn.ID}
 	if cache {
 		mgr.tokenDyns.Set(id, dyn, 1)
 		//mgr.tokenDyns.Wait()
@@ -282,76 +287,79 @@ func (mgr *DexManager) GetTokenDyn(chainid int64, address string, cache bool, ca
 	return dyn, true
 }
 
-func (mgr *DexManager) DbUpdatePoolLiqBatch(chainid int64, addrLiq0 map[string]decimal.Decimal, addrLiq1 map[string]decimal.Decimal,
-	addrLiqu map[string]float64, block int64) {
+func (mgr *DexManager) DbUpdatePoolDynBatch(chainid int64, ids []int64, liq0s []decimal.Decimal, liq1s []decimal.Decimal,
+	liqus []float64, block int64) error {
 
-	updates := make([]*model.TPoolDynamic, 0, len(addrLiq0))
-	for addr := range addrLiq0 {
-		keyAddr := util.NormalizeAddress(addr)
-		liq0, ok0 := addrLiq0[addr]
-		liq1, ok1 := addrLiq1[addr]
-		liqu, oku := addrLiqu[addr]
-		if !ok0 || !ok1 || !oku {
-			continue
-		}
+	if len(ids) != len(liq0s) || len(ids) != len(liq1s) || len(ids) != len(liqus) {
+		return errors.New("DexManager.DbUpdatePoolDynBatch: input slices length mismatch")
+	}
+
+	updates := make([]*model.TPoolDynamic, 0, len(ids))
+	for i, id := range ids {
 		pool := &model.TPoolDynamic{
-			Address:    keyAddr,
-			ChainID:    chainid,
-			Liquidity0: liq0,
-			Liquidity1: liq1,
-			Liquidityu: liqu,
+			ID:         id,
+			Liquidity0: liq0s[i],
+			Liquidity1: liq1s[i],
+			Liquidityu: liqus[i],
 			Block:      block,
 		}
 		updates = append(updates, pool)
 	}
 
-	if err := query.TPoolDynamic.WithContext(context.Background()).Save(updates...); err != nil {
+	err := query.TPoolDynamic.WithContext(context.Background()).Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "id"}},                                                         // The key to match on
+		DoUpdates: clause.AssignmentColumns([]string{"liquidity0", "liquidity1", "liquidityu", "block"}), // Only update field ''
+	}).Create(updates...)
+	if err != nil {
 		mgr.alerter.AlertText("DexManager.UpdateDBPoolLiqBatch: save pool liquidity batch failed", err)
 	}
+	return err
 }
 
-func (mgr *DexManager) DbUpdateTokenPriceuBatch(chainid int64, addrPriceu map[string]float64) {
+func (mgr *DexManager) DbUpdateTokenDynBatch(chainid int64, ids []int64, priceus []float64, bestPoolIds []int64, bestPoolVliqs []float64) error {
 
-	updates := make([]*model.TTokenDynamic, 0, len(addrPriceu))
-	for addr, priceu := range addrPriceu {
-		keyAddr := util.NormalizeAddress(addr)
+	if len(ids) != len(priceus) || len(ids) != len(bestPoolIds) || len(ids) != len(bestPoolVliqs) {
+		return errors.New("DexManager.DbUpdateTokenPriceuBatch: input slices length mismatch")
+	}
+
+	updates := make([]*model.TTokenDynamic, 0, len(ids))
+	for i, id := range ids {
 		tkn := &model.TTokenDynamic{
-			Address: keyAddr,
-			ChainID: chainid,
-			Priceu:  priceu,
+			ID:           id,
+			Priceu:       priceus[i],
+			BestPoolID:   bestPoolIds[i],
+			BestPoolVliq: bestPoolVliqs[i],
 		}
 		updates = append(updates, tkn)
 	}
 
-	if err := query.TTokenDynamic.WithContext(context.Background()).Save(updates...); err != nil {
+	err := query.TTokenDynamic.WithContext(context.Background()).Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "id"}},                                                  // The key to match on
+		DoUpdates: clause.AssignmentColumns([]string{"priceu", "best_pool_id", "best_pool_vliq"}), // Only update field ''
+	}).Create(updates...)
+
+	if err != nil {
 		mgr.alerter.AlertText("DexManager.UpdateDBTokenPriceuBatch: save token priceu batch failed", err)
 	}
+	return err
 }
 
 func (mgr *DexManager) GetDexPoolByID(id int64) (*model.TDexPool, bool) {
-	mgr.mutex.RLock()
-	defer mgr.mutex.RUnlock()
 	pool, ok := mgr.idDexPools[id]
 	return pool, ok
 }
 
 func (mgr *DexManager) GetLaunchpadByID(id int64) (*model.TLaunchpad, bool) {
-	mgr.mutex.RLock()
-	defer mgr.mutex.RUnlock()
 	lp, ok := mgr.idLaunchpads[id]
 	return lp, ok
 }
 
 func (mgr *DexManager) GetDexByID(id int64) (*model.TDex, bool) {
-	mgr.mutex.RLock()
-	defer mgr.mutex.RUnlock()
 	dex, ok := mgr.idDexs[id]
 	return dex, ok
 }
 
 func (mgr *DexManager) GetAllDexIds() []int64 {
-	mgr.mutex.RLock()
-	defer mgr.mutex.RUnlock()
 	ids := make([]int64, 0, len(mgr.idDexs))
 	for id := range mgr.idDexs {
 		ids = append(ids, id)
@@ -360,8 +368,6 @@ func (mgr *DexManager) GetAllDexIds() []int64 {
 }
 
 func (mgr *DexManager) GetAllLaunchpadIds() []int64 {
-	mgr.mutex.RLock()
-	defer mgr.mutex.RUnlock()
 	ids := make([]int64, 0, len(mgr.idLaunchpads))
 	for id := range mgr.idLaunchpads {
 		ids = append(ids, id)
@@ -370,8 +376,6 @@ func (mgr *DexManager) GetAllLaunchpadIds() []int64 {
 }
 
 func (mgr *DexManager) GetDexByFactory(factory string) (*model.TDex, *model.TDexPool, bool) {
-	mgr.mutex.RLock()
-	defer mgr.mutex.RUnlock()
 	key := util.NormalizeAddress(factory)
 	if key == "" {
 		return nil, nil, false
@@ -391,8 +395,6 @@ func (mgr *DexManager) GetDexByFactory(factory string) (*model.TDex, *model.TDex
 }
 
 func (mgr *DexManager) GetLaunchpadByFactory(factory string) (*model.TLaunchpad, bool) {
-	mgr.mutex.RLock()
-	defer mgr.mutex.RUnlock()
 	key := util.NormalizeAddress(factory)
 	if key == "" {
 		return nil, false
@@ -405,8 +407,6 @@ func (mgr *DexManager) GetLaunchpadByFactory(factory string) (*model.TLaunchpad,
 }
 
 func (mgr *DexManager) GetFamousToken(chainName, address string) (*model.TFamousToken, bool) {
-	mgr.mutex.RLock()
-	defer mgr.mutex.RUnlock()
 	chainKey := util.NormalizeString(chainName)
 	addrKey := util.NormalizeAddress(address)
 	chainMap, ok := mgr.chainFamousTokens[chainKey]
@@ -435,8 +435,8 @@ func (mgr *DexManager) IsFamousToken(chainName, address string) bool {
 	return ok
 }
 
+// can't reload without mutex
 func (mgr *DexManager) LoadInfo() {
-
 	// temp maps
 	idDexs := make(map[int64]*model.TDex)
 	factoryDexPools := make(map[string]*model.TDexPool)
@@ -512,12 +512,10 @@ func (mgr *DexManager) LoadInfo() {
 		}
 	}
 
-	mgr.mutex.Lock()
 	mgr.chainFamousTokens = chainFamousToken
 	mgr.idDexs = idDexs
 	mgr.idDexPools = idDexPools
 	mgr.idLaunchpads = idLaunchpads
 	mgr.factoryDexPools = factoryDexPools
 	mgr.factoryLaunchpads = factoryLaunchpads
-	mgr.mutex.Unlock()
 }
