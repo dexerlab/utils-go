@@ -1,6 +1,7 @@
 package defi
 
 import (
+	"math"
 	"math/big"
 
 	"github.com/shopspring/decimal"
@@ -32,6 +33,13 @@ func SqrtPriceX64ToPrice(sqrtPriceX64 *big.Int, zeroForOne bool) (price decimal.
 	return SqrtPriceXToPrice(sqrtPriceX64, zeroForOne, 64)
 }
 
-func SqurtPriceX32ToPrice(sqrtPriceX32 *big.Int, zeroForOne bool) (price decimal.Decimal) {
+func SqrtPriceX32ToPrice(sqrtPriceX32 *big.Int, zeroForOne bool) (price decimal.Decimal) {
 	return SqrtPriceXToPrice(sqrtPriceX32, zeroForOne, 32)
+}
+
+// vliq = xy
+func IsNewVliqBetter(oldVliq, newVliq float64, decimals int, priceu float64) bool {
+	adjust := newVliq / math.Pow(10, float64(decimals))
+	adjust = adjust * priceu
+	return newVliq > oldVliq
 }

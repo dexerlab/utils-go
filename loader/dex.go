@@ -105,16 +105,16 @@ func (mgr *DexManager) SetIdByAddress(chainid int64, address string, id int64, a
 	//mgr.addrIds.Wait()
 }
 
-func (mgr *DexManager) GetIdByAddress(chainid int64, address string, addrType AddrType, cache bool, cache404 bool) (int64, bool) {
+func (mgr *DexManager) GetIdByAddress(chainid int64, address string, addrType AddrType, cache bool, cache404 bool) (int64, bool, error) {
 	keyAddr := util.NormalizeAddress(address)
 	key := fmt.Sprintf("%s|%d", keyAddr, chainid)
 
 	if cache {
 		if v, ok := mgr.addrIds.Get(key); ok {
 			if v <= 0 {
-				return 0, false
+				return 0, false, nil
 			} else {
-				return v, true
+				return v, true, nil
 			}
 		}
 	}
@@ -141,18 +141,19 @@ func (mgr *DexManager) GetIdByAddress(chainid int64, address string, addrType Ad
 			id = pool.ID
 		}
 	default:
-		return 0, false
+		return 0, false, nil
 	}
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			if cache && cache404 {
-				mgr.addrIds.Set(key, -1, 1)
+				mgr.addrIds.Set(key, 0, 1)
 			}
+			return 0, false, nil
 		} else {
 			mgr.alerter.AlertText("DexManager.GetIdByAddress: query token failed", err)
+			return 0, false, err
 		}
-		return 0, false
 	}
 
 	if cache {
@@ -160,7 +161,7 @@ func (mgr *DexManager) GetIdByAddress(chainid int64, address string, addrType Ad
 		//mgr.addrIds.Wait()
 	}
 
-	return id, true
+	return id, true, nil
 }
 
 func (mgr *DexManager) SetPoolDynCache(id int64, dyn PoolDyn) {
@@ -168,13 +169,13 @@ func (mgr *DexManager) SetPoolDynCache(id int64, dyn PoolDyn) {
 	//mgr.poolDyns.Wait()
 }
 
-func (mgr *DexManager) GetPoolDyn(chainid int64, address string, cache bool, cache404 bool) (PoolDyn, bool) {
+func (mgr *DexManager) GetPoolDyn(chainid int64, address string, cache bool, cache404 bool) (PoolDyn, bool, error) {
 
 	var id int64 = 0
 	if cache {
-		aid, ok := mgr.GetIdByAddress(chainid, address, AddrTypePool, cache, cache404)
-		if !ok {
-			return PoolDyn{}, false
+		aid, ok, err := mgr.GetIdByAddress(chainid, address, AddrTypePool, cache, cache404)
+		if !ok || err != nil {
+			return PoolDyn{}, false, err
 		}
 		id = aid
 	}
@@ -182,9 +183,9 @@ func (mgr *DexManager) GetPoolDyn(chainid int64, address string, cache bool, cac
 	if cache {
 		if v, ok := mgr.poolDyns.Get(id); ok {
 			if v.ID <= 0 {
-				return PoolDyn{}, false
+				return PoolDyn{}, false, nil
 			} else {
-				return v, true
+				return v, true, nil
 			}
 		}
 	}
@@ -202,33 +203,35 @@ func (mgr *DexManager) GetPoolDyn(chainid int64, address string, cache bool, cac
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			if cache && cache404 {
-				dyn := PoolDyn{ID: -1}
+				dyn := PoolDyn{ID: 0}
 				mgr.poolDyns.Set(id, dyn, 1)
 			}
+			return PoolDyn{}, false, nil
 		} else {
 			mgr.alerter.AlertText("DexManager.GetTokenDyn: query token failed", err)
+			return PoolDyn{}, false, err
 		}
-		return PoolDyn{}, false
+
 	}
 
 	if cache {
 		mgr.poolDyns.Set(id, dyn, 1)
 		//mgr.poolDyns.Wait()
 	}
-	return dyn, true
+	return dyn, true, nil
 }
 
-func (mgr *DexManager) GetTokenPriceu(chainid int64, chainName string, address string, cache bool, cache404 bool) (float64, bool) {
+func (mgr *DexManager) GetTokenPriceu(chainid int64, chainName string, address string, cache bool, cache404 bool) (float64, bool, error) {
 	ftkn, ok := mgr.GetFamousToken(chainName, address)
 	if ok && ftkn.IsStable {
-		return 1.0, true
+		return 1.0, true, nil
 	}
 
-	tknDyn, ok := mgr.GetTokenDyn(chainid, address, cache, cache404)
-	if !ok {
-		return 0, false
+	tknDyn, ok, err := mgr.GetTokenDyn(chainid, address, cache, cache404)
+	if !ok || err != nil {
+		return 0, false, err
 	}
-	return tknDyn.Priceu, true
+	return tknDyn.Priceu, true, nil
 }
 
 func (mgr *DexManager) SetTokenDynCache(id int64, dyn TokenDyn) {
@@ -236,13 +239,13 @@ func (mgr *DexManager) SetTokenDynCache(id int64, dyn TokenDyn) {
 	//mgr.tokenDyns.Wait()
 }
 
-func (mgr *DexManager) GetTokenDyn(chainid int64, address string, cache bool, cache404 bool) (TokenDyn, bool) {
+func (mgr *DexManager) GetTokenDyn(chainid int64, address string, cache bool, cache404 bool) (TokenDyn, bool, error) {
 
 	var id int64 = 0
 	if cache {
-		aid, ok := mgr.GetIdByAddress(chainid, address, AddrTypePool, cache, cache404)
-		if !ok {
-			return TokenDyn{}, false
+		aid, ok, err := mgr.GetIdByAddress(chainid, address, AddrTypePool, cache, cache404)
+		if !ok || err != nil {
+			return TokenDyn{}, false, err
 		}
 		id = aid
 	}
@@ -250,9 +253,9 @@ func (mgr *DexManager) GetTokenDyn(chainid int64, address string, cache bool, ca
 	if cache {
 		if v, ok := mgr.tokenDyns.Get(id); ok {
 			if v.ID <= 0 {
-				return TokenDyn{}, false
+				return TokenDyn{}, false, nil
 			} else {
-				return v, true
+				return v, true, nil
 			}
 		}
 	}
@@ -270,13 +273,15 @@ func (mgr *DexManager) GetTokenDyn(chainid int64, address string, cache bool, ca
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			if cache && cache404 {
-				dyn := TokenDyn{ID: -1}
+				dyn := TokenDyn{ID: 0}
 				mgr.tokenDyns.Set(id, dyn, 1)
 			}
+			return TokenDyn{}, false, nil
 		} else {
 			mgr.alerter.AlertText("DexManager.GetTokenDyn: query token failed", err)
+			return TokenDyn{}, false, err
 		}
-		return TokenDyn{}, false
+
 	}
 
 	if cache {
@@ -284,7 +289,7 @@ func (mgr *DexManager) GetTokenDyn(chainid int64, address string, cache bool, ca
 		//mgr.tokenDyns.Wait()
 	}
 
-	return dyn, true
+	return dyn, true, nil
 }
 
 func (mgr *DexManager) DbUpdatePoolDynBatch(chainid int64, ids []int64, liq0s []decimal.Decimal, liq1s []decimal.Decimal,
@@ -311,7 +316,7 @@ func (mgr *DexManager) DbUpdatePoolDynBatch(chainid int64, ids []int64, liq0s []
 		DoUpdates: clause.AssignmentColumns([]string{"liquidity0", "liquidity1", "liquidityu", "block"}), // Only update field ''
 	}).Create(updates...)
 	if err != nil {
-		mgr.alerter.AlertText("DexManager.UpdateDBPoolLiqBatch: save pool liquidity batch failed", err)
+		mgr.alerter.AlertText("DexManager.UpdateDBPoolLiqBatch: update pool liquidity batch failed", err)
 	}
 	return err
 }
@@ -339,7 +344,7 @@ func (mgr *DexManager) DbUpdateTokenDynBatch(chainid int64, ids []int64, priceus
 	}).Create(updates...)
 
 	if err != nil {
-		mgr.alerter.AlertText("DexManager.UpdateDBTokenPriceuBatch: save token priceu batch failed", err)
+		mgr.alerter.AlertText("DexManager.UpdateDBTokenPriceuBatch: update token priceu batch failed", err)
 	}
 	return err
 }
