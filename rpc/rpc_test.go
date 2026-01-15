@@ -22,8 +22,8 @@ func TestSol(t *testing.T) {
 
 	t.Log("test sol...")
 	solRpc := NewSolanaRpc(&loader.ChainInfo{Name: "SolanaMainnet", Client: rpc.New("https://api.mainnet-beta.solana.com")})
-	t.Log(solRpc.GetTokenInfo(context.TODO(), "5k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R", false))
-	t.Log(solRpc.GetTokenInfo(context.TODO(), "zzsReZFpYxg1xYBQbfRKHytGYFEHpPPUCa4NtrHp5pE", false))
+	t.Log(solRpc.GetTokenInfo(context.TODO(), "So11111111111111111111111111111111111111111", false))
+	t.Log(solRpc.GetTokenInfo(context.TODO(), "7FUvEbMze2mmYrVJq3GtGAyPyF9s9RCiMWCtPLSpump", false))
 	t.Log(solRpc.GetTokenInfo(context.TODO(), "zzMSBu58juvqZbYnqhVMdSFwguiw8oL17T4q3dMWGaN", false))
 	t.Log(solRpc.GetTokenInfo(context.TODO(), "J8qZijXxrypJin5Y27qcTvNjmd5ybF44NJdDKCSkXxWv", false))
 	t.Log(solRpc.GetTokenInfo(context.TODO(), "Fm1hguSMcAcVQ7gLMkyihnUJ5JfcTrBNSz1T4CFFpump", false))

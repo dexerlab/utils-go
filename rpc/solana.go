@@ -97,7 +97,9 @@ func getExtensionData(extensionType uint16, tlvData []byte) []byte {
 }
 
 func (w *SolanaRpc) GetTokenInfo(ctx context.Context, tokenAddr string, cache bool) (*loader.TokenInfo, error) {
-	if util.IsHexStringZero(tokenAddr) || tokenAddr == "11111111111111111111111111111111" {
+	if util.IsHexStringZero(tokenAddr) ||
+		tokenAddr == "11111111111111111111111111111111" ||
+		tokenAddr == "So11111111111111111111111111111111111111111" {
 		return &loader.TokenInfo{
 			TokenName:    "SOL",
 			ChainName:    w.chainInfo.Name,
