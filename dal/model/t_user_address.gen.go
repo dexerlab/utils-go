@@ -14,8 +14,8 @@ const TableNameTUserAddress = "t_user_address"
 type TUserAddress struct {
 	ID       int64     `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true" json:"id,string"`
 	UID      int64     `gorm:"column:uid;type:bigint" json:"uid,string"`
-	Sn       int32     `gorm:"column:sn;type:int" json:"sn"`
 	Network  int32     `gorm:"column:network;type:int" json:"network"`
+	Sn       int32     `gorm:"column:sn;type:int" json:"sn"`
 	Address  string    `gorm:"column:address;type:varchar(255)" json:"address"`
 	CreateAt time.Time `gorm:"column:create_at;type:timestamp;default:CURRENT_TIMESTAMP" json:"create_at"`
 	UpdateAt time.Time `gorm:"column:update_at;type:timestamp;default:CURRENT_TIMESTAMP" json:"update_at"`

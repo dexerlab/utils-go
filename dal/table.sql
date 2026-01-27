@@ -643,10 +643,10 @@ CREATE TABLE t_user_address (
   -- 主键，自增，作为唯一标识符
   uid BIGINT,
   -- 用户标识符
-  sn INT,
-  -- 地址组序号
   network INT,
   -- 网络类型 (1: EVM, 2: StarkNet, 3: Solana, 4: BTC)
+  sn INT,
+  -- 地址组序号
   address VARCHAR(255),
   -- 存储地址，最大长度为 128 字符
   create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -654,7 +654,7 @@ CREATE TABLE t_user_address (
   update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   -- 更新时间，自动更新为当前时间
   -- Indexes
-  INDEX idx_uid (uid) -- 用户ID建立索引
+  UNIQUE KEY idx_uid_network_sn (uid, network, sn)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 -- CREATE TABLE `t_token_info` (

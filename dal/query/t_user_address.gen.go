@@ -29,8 +29,8 @@ func newTUserAddress(db *gorm.DB, opts ...gen.DOOption) tUserAddress {
 	_tUserAddress.ALL = field.NewAsterisk(tableName)
 	_tUserAddress.ID = field.NewInt64(tableName, "id")
 	_tUserAddress.UID = field.NewInt64(tableName, "uid")
-	_tUserAddress.Sn = field.NewInt32(tableName, "sn")
 	_tUserAddress.Network = field.NewInt32(tableName, "network")
+	_tUserAddress.Sn = field.NewInt32(tableName, "sn")
 	_tUserAddress.Address = field.NewString(tableName, "address")
 	_tUserAddress.CreateAt = field.NewTime(tableName, "create_at")
 	_tUserAddress.UpdateAt = field.NewTime(tableName, "update_at")
@@ -46,8 +46,8 @@ type tUserAddress struct {
 	ALL      field.Asterisk
 	ID       field.Int64
 	UID      field.Int64
-	Sn       field.Int32
 	Network  field.Int32
+	Sn       field.Int32
 	Address  field.String
 	CreateAt field.Time
 	UpdateAt field.Time
@@ -69,8 +69,8 @@ func (t *tUserAddress) updateTableName(table string) *tUserAddress {
 	t.ALL = field.NewAsterisk(table)
 	t.ID = field.NewInt64(table, "id")
 	t.UID = field.NewInt64(table, "uid")
-	t.Sn = field.NewInt32(table, "sn")
 	t.Network = field.NewInt32(table, "network")
+	t.Sn = field.NewInt32(table, "sn")
 	t.Address = field.NewString(table, "address")
 	t.CreateAt = field.NewTime(table, "create_at")
 	t.UpdateAt = field.NewTime(table, "update_at")
@@ -105,8 +105,8 @@ func (t *tUserAddress) fillFieldMap() {
 	t.fieldMap = make(map[string]field.Expr, 7)
 	t.fieldMap["id"] = t.ID
 	t.fieldMap["uid"] = t.UID
-	t.fieldMap["sn"] = t.Sn
 	t.fieldMap["network"] = t.Network
+	t.fieldMap["sn"] = t.Sn
 	t.fieldMap["address"] = t.Address
 	t.fieldMap["create_at"] = t.CreateAt
 	t.fieldMap["update_at"] = t.UpdateAt
