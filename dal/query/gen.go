@@ -20,6 +20,7 @@ var (
 	TChainInfo           *tChainInfo
 	TDex                 *tDex
 	TDexPool             *tDexPool
+	TDiscoverApp         *tDiscoverApp
 	TEventProcessedBlock *tEventProcessedBlock
 	TFamousToken         *tFamousToken
 	TGappedBlock         *tGappedBlock
@@ -44,6 +45,7 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	TChainInfo = &Q.TChainInfo
 	TDex = &Q.TDex
 	TDexPool = &Q.TDexPool
+	TDiscoverApp = &Q.TDiscoverApp
 	TEventProcessedBlock = &Q.TEventProcessedBlock
 	TFamousToken = &Q.TFamousToken
 	TGappedBlock = &Q.TGappedBlock
@@ -69,6 +71,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		TChainInfo:           newTChainInfo(db, opts...),
 		TDex:                 newTDex(db, opts...),
 		TDexPool:             newTDexPool(db, opts...),
+		TDiscoverApp:         newTDiscoverApp(db, opts...),
 		TEventProcessedBlock: newTEventProcessedBlock(db, opts...),
 		TFamousToken:         newTFamousToken(db, opts...),
 		TGappedBlock:         newTGappedBlock(db, opts...),
@@ -95,6 +98,7 @@ type Query struct {
 	TChainInfo           tChainInfo
 	TDex                 tDex
 	TDexPool             tDexPool
+	TDiscoverApp         tDiscoverApp
 	TEventProcessedBlock tEventProcessedBlock
 	TFamousToken         tFamousToken
 	TGappedBlock         tGappedBlock
@@ -122,6 +126,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		TChainInfo:           q.TChainInfo.clone(db),
 		TDex:                 q.TDex.clone(db),
 		TDexPool:             q.TDexPool.clone(db),
+		TDiscoverApp:         q.TDiscoverApp.clone(db),
 		TEventProcessedBlock: q.TEventProcessedBlock.clone(db),
 		TFamousToken:         q.TFamousToken.clone(db),
 		TGappedBlock:         q.TGappedBlock.clone(db),
@@ -156,6 +161,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		TChainInfo:           q.TChainInfo.replaceDB(db),
 		TDex:                 q.TDex.replaceDB(db),
 		TDexPool:             q.TDexPool.replaceDB(db),
+		TDiscoverApp:         q.TDiscoverApp.replaceDB(db),
 		TEventProcessedBlock: q.TEventProcessedBlock.replaceDB(db),
 		TFamousToken:         q.TFamousToken.replaceDB(db),
 		TGappedBlock:         q.TGappedBlock.replaceDB(db),
@@ -180,6 +186,7 @@ type queryCtx struct {
 	TChainInfo           ITChainInfoDo
 	TDex                 ITDexDo
 	TDexPool             ITDexPoolDo
+	TDiscoverApp         ITDiscoverAppDo
 	TEventProcessedBlock ITEventProcessedBlockDo
 	TFamousToken         ITFamousTokenDo
 	TGappedBlock         ITGappedBlockDo
@@ -204,6 +211,7 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		TChainInfo:           q.TChainInfo.WithContext(ctx),
 		TDex:                 q.TDex.WithContext(ctx),
 		TDexPool:             q.TDexPool.WithContext(ctx),
+		TDiscoverApp:         q.TDiscoverApp.WithContext(ctx),
 		TEventProcessedBlock: q.TEventProcessedBlock.WithContext(ctx),
 		TFamousToken:         q.TFamousToken.WithContext(ctx),
 		TGappedBlock:         q.TGappedBlock.WithContext(ctx),

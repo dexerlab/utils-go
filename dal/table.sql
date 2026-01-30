@@ -434,6 +434,18 @@ CREATE TABLE t_dex (
   UNIQUE KEY `idx_name_version` (`name`, `version`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
+CREATE TABLE t_discover_app (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(64) NOT NULL,
+  version VARCHAR(64) NOT NULL DEFAULT '',
+  icon VARCHAR(2000) NOT NULL DEFAULT '',
+  website VARCHAR(2000) NOT NULL DEFAULT '',
+  description VARCHAR(1000) NOT NULL DEFAULT '',
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY `idx_name_version` (`name`, `version`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+
 CREATE TABLE `t_famous_token` (
   `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `token_name` varchar(128) NOT NULL,
