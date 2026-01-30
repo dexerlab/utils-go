@@ -441,6 +441,8 @@ CREATE TABLE t_discover_app (
   icon VARCHAR(2000) NOT NULL DEFAULT '',
   website VARCHAR(2000) NOT NULL DEFAULT '',
   description VARCHAR(1000) NOT NULL DEFAULT '',
+  disabled tinyint(1) NOT NULL DEFAULT '0',
+  order_weight int NOT NULL DEFAULT '1000',
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY `idx_name_version` (`name`, `version`)

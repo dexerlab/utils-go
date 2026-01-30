@@ -18,6 +18,8 @@ type TDiscoverApp struct {
 	Icon        string    `gorm:"column:icon;type:varchar(2000);not null" json:"icon"`
 	Website     string    `gorm:"column:website;type:varchar(2000);not null" json:"website"`
 	Description string    `gorm:"column:description;type:varchar(1000);not null" json:"description"`
+	Disabled    bool      `gorm:"column:disabled;type:tinyint(1);not null" json:"disabled"`
+	OrderWeight int32     `gorm:"column:order_weight;type:int;not null;default:1000" json:"order_weight"`
 	CreatedAt   time.Time `gorm:"column:created_at;type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt   time.Time `gorm:"column:updated_at;type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"updated_at"`
 }

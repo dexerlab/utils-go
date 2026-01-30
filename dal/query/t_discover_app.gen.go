@@ -33,6 +33,8 @@ func newTDiscoverApp(db *gorm.DB, opts ...gen.DOOption) tDiscoverApp {
 	_tDiscoverApp.Icon = field.NewString(tableName, "icon")
 	_tDiscoverApp.Website = field.NewString(tableName, "website")
 	_tDiscoverApp.Description = field.NewString(tableName, "description")
+	_tDiscoverApp.Disabled = field.NewBool(tableName, "disabled")
+	_tDiscoverApp.OrderWeight = field.NewInt32(tableName, "order_weight")
 	_tDiscoverApp.CreatedAt = field.NewTime(tableName, "created_at")
 	_tDiscoverApp.UpdatedAt = field.NewTime(tableName, "updated_at")
 
@@ -51,6 +53,8 @@ type tDiscoverApp struct {
 	Icon        field.String
 	Website     field.String
 	Description field.String
+	Disabled    field.Bool
+	OrderWeight field.Int32
 	CreatedAt   field.Time
 	UpdatedAt   field.Time
 
@@ -75,6 +79,8 @@ func (t *tDiscoverApp) updateTableName(table string) *tDiscoverApp {
 	t.Icon = field.NewString(table, "icon")
 	t.Website = field.NewString(table, "website")
 	t.Description = field.NewString(table, "description")
+	t.Disabled = field.NewBool(table, "disabled")
+	t.OrderWeight = field.NewInt32(table, "order_weight")
 	t.CreatedAt = field.NewTime(table, "created_at")
 	t.UpdatedAt = field.NewTime(table, "updated_at")
 
@@ -105,13 +111,15 @@ func (t *tDiscoverApp) GetFieldByName(fieldName string) (field.OrderExpr, bool) 
 }
 
 func (t *tDiscoverApp) fillFieldMap() {
-	t.fieldMap = make(map[string]field.Expr, 8)
+	t.fieldMap = make(map[string]field.Expr, 10)
 	t.fieldMap["id"] = t.ID
 	t.fieldMap["name"] = t.Name
 	t.fieldMap["version"] = t.Version
 	t.fieldMap["icon"] = t.Icon
 	t.fieldMap["website"] = t.Website
 	t.fieldMap["description"] = t.Description
+	t.fieldMap["disabled"] = t.Disabled
+	t.fieldMap["order_weight"] = t.OrderWeight
 	t.fieldMap["created_at"] = t.CreatedAt
 	t.fieldMap["updated_at"] = t.UpdatedAt
 }
